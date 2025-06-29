@@ -1,0 +1,1059 @@
+{% extends "base.html" %}
+{% set navbar_page_title = "Users & Permissions" %}
+{% block title %}Users & Permissions{% endblock %}
+
+{% block styles %}
+
+{% endblock %}
+
+{% block scripts %}
+  <script src="{{ url_for('static', path='/js/ag-grid-community.min.js') }}"></script>
+  
+{% endblock %}
+
+{% block content %}
+  <div class="row g-0">
+    <!-- Sidebar -->
+    <div class="col-lg-2 col-md-3">
+      <!-- Sidebar toggle button for small screens -->
+      <div class="d-flex">
+        <button class="btn btn-custom-blue d-lg-none m-2" type="button" data-bs-toggle="offcanvas" 
+                data-bs-target="#sidebarOffcanvas" aria-controls="sidebarOffcanvas">
+          <i class="fas fa-bars"></i> Menu
+        </button>
+      </div>
+      <!-- Sidebar for large screens -->
+      <div class="d-none d-lg-block">
+        <div class="bg-light border-end vh-100 p-3" style="min-height: calc(100vh - 120px);">
+          <div class="sidebar-content">
+            
+            <div class="list-group list-group-flush">
+              <button type="button" class="list-group-item list-group-item-action d-flex align-items-center py-3 sidebar-btn" 
+                      data-content="users">
+                <i class="fas fa-users me-3 text-primary"></i>
+                <span>Users</span>
+              </button>
+              
+              <button type="button" class="list-group-item list-group-item-action d-flex align-items-center py-3 sidebar-btn" 
+                      data-content="user-roles">
+                <i class="fas fa-user-shield me-3 text-success"></i>
+                <span>User Roles</span>
+              </button>
+
+              <button type="button" class="list-group-item list-group-item-action d-flex align-items-center py-3 sidebar-btn" 
+                      data-content="user-skills">
+                <i class="fas fa-hammer me-3 text-warning"></i>
+                <span>User Skills</span>
+              </button>
+
+              <button type="button" class="list-group-item list-group-item-action d-flex align-items-center py-3 sidebar-btn" 
+                      data-content="modules">
+                <i class="fas fa-gears me-3 text-secondary"></i>
+                <span>Existing Modules</span>
+              </button>
+
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Offcanvas sidebar for small screens -->
+      <div class="offcanvas offcanvas-start d-lg-none" tabindex="-1" id="sidebarOffcanvas" 
+           aria-labelledby="sidebarOffcanvasLabel">
+        <div class="offcanvas-header">
+          <h5 class="offcanvas-title" id="sidebarOffcanvasLabel">Menu</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+        </div>
+        <div class="offcanvas-body">
+                    
+          <div class="list-group list-group-flush">
+            <button type="button" class="list-group-item list-group-item-action d-flex align-items-center py-3 sidebar-btn" 
+                    data-content="users" data-bs-dismiss="offcanvas">
+              <i class="fas fa-users me-3 text-primary"></i>
+              <span>Users</span>
+            </button>
+            
+            <button type="button" class="list-group-item list-group-item-action d-flex align-items-center py-3 sidebar-btn" 
+                    data-content="user-roles" data-bs-dismiss="offcanvas">
+              <i class="fas fa-user-shield me-3 text-success"></i>
+              <span>User Roles</span>
+            </button>
+
+            <button type="button" class="list-group-item list-group-item-action d-flex align-items-center py-3 sidebar-btn" 
+                    data-content="user-skills" data-bs-dismiss="offcanvas">
+              <i class="fas fa-hammer me-3 text-warning"></i>
+              <span>User Skills</span>
+            </button>
+
+            <button type="button" class="list-group-item list-group-item-action d-flex align-items-center py-3 sidebar-btn" 
+                    data-content="modules" data-bs-dismiss="offcanvas">
+              <i class="fas fa-gears me-3 text-secondary"></i>
+              <span>Existing Modules</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  
+    <!-- Main content area -->
+    <div class="col-lg-10 col-md-12">
+      <div class="p-4">
+        <!-- Welcome message -->
+        <div id="welcome-content" class="text-center py-5">
+          <i class="fas fa-users-cog fa-3x text-muted mb-3"></i>
+          <h4 class="text-muted">Welcome to Users & Permissions</h4>
+          <p class="text-muted">Select an option from the sidebar to get started</p>
+        </div>
+  
+        <!-- Users content -->
+        <div id="users-content" class="content-section fade-in" style="display: none;">
+          <div class="d-flex mb-4">
+            <h3 class="mb-0">
+              <i class="fas fa-users text-primary me-2"></i>
+              Users Management
+            </h3>
+          </div>
+        </div>
+  
+        <!-- User Roles content -->
+        <div id="user-roles-content" class="content-section fade-in" style="display: none;">
+          <div class="d-flex justify-content-between align-items-center mb-4">
+            <h3 class="mb-0">
+              <i class="fas fa-user-shield text-success me-2"></i>
+              User Roles Management
+            </h3>
+            <button class="btn btn-success" id="user-roles-addRoleBtn">
+              <i class="fas fa-plus me-2"></i>
+              Add Role
+            </button>          
+          </div>
+
+          <!-- Data Grid container -->
+          <div class="container-flex">            
+            <div id="user-roles-grid" style="height: 600px"></div> 
+          </div>
+
+          {% include 'snippets/user_roles_modals.html' %}
+        </div>
+      
+        <!-- User Skills content -->
+        <div id="user-skills-content" class="content-section fade-in" style="display: none;">
+          <div class="d-flex mb-4">
+            <h3 class="mb-0">
+              <i class="fas fa-hammer text-warning me-2"></i>
+              User Skills Management
+            </h3>
+          </div>
+        </div>
+
+        <!-- Modules content -->
+        <div id="modules-content" class="content-section fade-in" style="display: none;">
+          <div class="d-flex mb-4">
+            <h3 class="mb-0">
+              <i class="fas fa-gears text-secondary me-2"></i>
+              Existing Modules
+            </h3>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+
+  <!-- <script>
+    class UserRoleGrid {
+      constructor() {
+        this.gridDiv = document.querySelector("#user-roles-grid");
+        this.preferredColumnOrder = [
+            "id", "rolename", "can_create", "can_read", 
+            "can_update", "can_delete", "notes", "users"
+        ];
+      }
+
+      async loadRoles() {
+        try {
+          const data = await this.fetchRoles();
+          const gridOptions = this.createGridOptions(data);
+          this.initializeGrid(gridOptions);
+        } catch (error) {
+          this.handleError(error);
+        }
+      }
+
+      async fetchRoles() {
+        const response = await fetch("{{ url_for('get_all_user_roles') }}", {
+          method: 'GET',
+          headers: { 'Accept': 'application/json' }
+        });
+
+        if (!response.ok) {
+          throw new Error(`Failed to fetch roles: ${response.status}`);
+        }
+
+        return await response.json();
+      }
+
+      createGridOptions(data) {
+        const hasData = Array.isArray(data) && data.length > 0;
+        return {
+          rowData: hasData ? data : [],
+          columnDefs: hasData ? this.createColumnDefs(data[0]) : [],
+          defaultColDef: {
+            resizable: true,
+            flex: 1,
+            minWidth: 100
+          },
+          getRowId: (params) => params.data.id,
+          onCellClicked: this.handleCellClick.bind(this)
+        };
+      }
+
+      createColumnDefs(firstRow) {
+        const allKeys = Object.keys(firstRow);
+        const orderedKeys = [
+          ...this.preferredColumnOrder,
+          ...allKeys.filter(key => !this.preferredColumnOrder.includes(key))
+        ];
+
+        const columnDefs = orderedKeys.map(key => this.createColumnDef(key));
+        columnDefs.push(this.createActionsColumn());
+        
+        return columnDefs;
+      }
+
+      createColumnDef(key) {
+        if (key === "users") {
+          return {
+            field: "users",
+            headerName: "USERS",
+            valueGetter: (params) => `${params.data.users?.length || 0} user(s)`,
+            sortable: true,
+            filter: false
+          };
+        }
+
+        return {
+          field: key,
+          headerName: key.replace(/_/g, " ").toUpperCase(),
+          sortable: true,
+          filter: true,
+          resizable: true
+        };
+      }
+
+      createActionsColumn() {
+        return {
+          headerName: 'Actions',
+          field: 'actions',
+          minWidth: 140,
+          cellRenderer: () => `
+              <div class="btn-group" role="group">
+                  <button class="btn btn-sm btn-outline-primary" 
+                          title="Edit" data-action="edit">
+                      <i class="fas fa-edit"></i>
+                  </button>
+                  <button class="btn btn-sm btn-outline-danger" 
+                          title="Delete" data-action="delete">
+                      <i class="fas fa-trash-alt"></i>
+                  </button>
+                  <button class="btn btn-sm btn-outline-info" 
+                          title="Show Users" data-action="show-users">
+                      <i class="fas fa-user"></i>
+                  </button>
+              </div>
+          `
+        };
+      }
+
+      handleCellClick(params) {
+        const button = params.event.target.closest("button");
+        if (!button || !button.dataset.action) return;
+
+        const action = button.dataset.action;
+        const actionHandlers = {
+          'show-users': () => this.showUsers(params.data.users || []),
+          'edit': () => this.editRole(params),
+          'delete': () => this.deleteRole(params)
+        };
+
+        const handler = actionHandlers[action];
+        if (handler) handler();
+      }
+
+      showUsers(users) {
+        const usersList = document.getElementById("user-roles-usersList");
+        usersList.innerHTML = "";
+
+        if (users.length === 0) {
+          usersList.innerHTML = "<li class='list-group-item text-muted'>No users assigned</li>";
+        } else {
+          users.forEach(user => {
+            const listItem = this.createUserListItem(user);
+            usersList.appendChild(listItem);
+          });
+        }
+
+        const modal = bootstrap.Modal.getOrCreateInstance(
+          document.getElementById("user-roles-showUsersModal")
+        );
+        modal.show();
+      }
+
+      createUserListItem(user) {
+        const li = document.createElement("li");
+        li.className = "list-group-item";
+        li.innerHTML = `
+          <strong>${user.name} ${user.surname}</strong>
+          <div><small>${user.email} – ${user.usertype}</small></div>
+        `;
+        return li;
+      }
+
+      editRole(params) {
+        // Store edit context
+        this.gridDiv.__pendingEdit = {
+          roleId: params.data.id,
+          rowData: params.data,
+          rowNode: params.node
+        };
+
+        // Populate form fields
+        const formFields = {
+          editRoleName: params.data.rolename || "",
+          editNotes: params.data.notes || "",
+          editCanCreate: params.data.can_create || false,
+          editCanRead: params.data.can_read || false,
+          editCanUpdate: params.data.can_update || false,
+          editCanDelete: params.data.can_delete || false
+        };
+
+        Object.entries(formFields).forEach(([fieldId, value]) => {
+          const element = document.getElementById("user-roles-"+fieldId);
+          if (element) {
+            if (element.type === 'checkbox') {
+              element.checked = value;
+            } else {
+              element.value = value;
+            }
+          }
+        });
+
+        const modal = bootstrap.Modal.getOrCreateInstance(
+          document.getElementById("user-roles-editRoleModal")
+        );
+        modal.show();
+      }
+
+      deleteRole(params) {
+        this.gridDiv.__pendingDelete = {
+          roleId: params.data.id,
+          rowNode: params.node
+        };
+
+        const modal = bootstrap.Modal.getOrCreateInstance(
+          document.getElementById("user-roles-confirmDeleteModal")
+        );
+        modal.show();
+      }
+
+      initializeGrid(gridOptions) {
+        // Destroy existing grid if present
+        if (this.gridDiv.__agGridInstance) {
+          this.gridDiv.__agGridInstance.destroy();
+        }
+
+        // Create new grid instance
+        this.gridDiv.__agGridInstance = agGrid.createGrid(this.gridDiv, gridOptions);
+      }
+
+      handleError(error) {
+        console.error("Error loading roles:", error);
+        alert("Could not load user roles. Please try again later.");
+      }
+
+      // Method to add a new role to the grid
+      addNewRole(newRole) {
+        if (!this.gridDiv.__agGridInstance) {
+          console.error("Grid instance not found");
+          return false;
+        }
+
+        // Ensure users array exists
+        newRole.users = newRole.users || [];
+
+        // Check if grid is empty (no column definitions means empty grid)
+        const currentColumnDefs = this.gridDiv.__agGridInstance.getColumnDefs();
+        const isEmptyGrid = !currentColumnDefs || currentColumnDefs.length === 0;
+
+        if (isEmptyGrid) {
+          // For empty grid, we need to reinitialize with proper columns
+          this.reinitializeGridWithData([newRole]);
+        } else {
+          // For existing grid with data, just add the new row
+          this.gridDiv.__agGridInstance.applyTransaction({ add: [newRole] });
+        }
+
+        return true;
+      }
+
+      // Helper method to reinitialize grid with data
+      reinitializeGridWithData(data) {
+        const gridOptions = this.createGridOptions(data);
+        this.initializeGrid(gridOptions);
+      }
+
+    // Method to check if grid is empty
+      isGridEmpty() {
+        if (!this.gridDiv.__agGridInstance) return true;
+        
+        const rowData = [];
+        this.gridDiv.__agGridInstance.forEachNode(node => rowData.push(node.data));
+        return rowData.length === 0;
+      }
+    }
+
+    // Usage
+    const userRoleGrid = new UserRoleGrid();
+
+    async function loadRoles() {
+        await userRoleGrid.loadRoles();
+    }
+
+
+    // Add Role Button Event Listener
+    document.getElementById("user-roles-addRoleBtn").addEventListener("click", () => {
+    // Clear the form
+    document.getElementById("user-roles-addRoleForm").reset();
+    
+    const addModal = bootstrap.Modal.getOrCreateInstance(document.getElementById("user-roles-addRoleModal"));
+    addModal.show();
+    });
+
+    // Save Add Role
+    document.getElementById("user-roles-saveAddBtn").addEventListener("click", async () => {
+        const formData = {
+            rolename: document.getElementById("user-roles-addRoleName").value.trim(),
+            notes: document.getElementById("user-roles-addNotes").value.trim(),
+            can_create: document.getElementById("user-roles-addCanCreate").checked,
+            can_read: document.getElementById("user-roles-addCanRead").checked,
+            can_update: document.getElementById("user-roles-addCanUpdate").checked,
+            can_delete: document.getElementById("user-roles-addCanDelete").checked
+        };
+
+        if (!formData.rolename) {
+            alert("Role name is required");
+            return;
+        }
+
+        try {
+            const response = await fetch("{{ url_for('create_new_user_role') }}", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(formData)
+            });
+
+            if (response.ok) {
+                const newRole = await response.json();
+                
+                // Use the new method to add the role to the grid
+                const success = userRoleGrid.addNewRole(newRole);
+                
+                if (!success) {
+                    console.warn("Failed to add role to grid, reloading grid data");
+                    // Fallback: reload the entire grid
+                    await userRoleGrid.loadRoles();
+                }
+
+                // Close modal and reset form
+                bootstrap.Modal.getInstance(document.getElementById("user-roles-addRoleModal")).hide();
+                document.getElementById("user-roles-addRoleForm").reset();
+                
+            } else {
+                const errorText = await response.text();
+                alert("Failed to create role: " + errorText);
+            }
+        } catch (error) {
+            console.error("Error creating role:", error);
+            alert("Network error - please try again.");
+        }
+    });
+    // Save Edit Role
+    document.getElementById("user-roles-saveEditBtn").addEventListener("click", async () => {
+      const gridDiv = document.querySelector("#user-roles-grid");
+      const pending = gridDiv.__pendingEdit;
+      
+      if (!pending) return;
+
+      const formData = {
+        rolename: document.getElementById("user-roles-editRoleName").value.trim(),
+        notes: document.getElementById("user-roles-editNotes").value.trim(),
+        can_create: document.getElementById("user-roles-editCanCreate").checked,
+        can_read: document.getElementById("user-roles-editCanRead").checked,
+        can_update: document.getElementById("user-roles-editCanUpdate").checked,
+        can_delete: document.getElementById("user-roles-editCanDelete").checked
+      };
+
+      if (!formData.rolename) {
+        alert("Role name is required");
+        return;
+      }
+
+      try {
+        const baseUpdateUrl = "{{ url_for('update_existing_user_role', role_id='PLACEHOLDER') }}".replace('PLACEHOLDER', pending.roleId);
+        const response = await fetch(baseUpdateUrl, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(formData)
+        });
+
+        if (response.ok) {
+          const updatedRole = await response.json();
+          
+          // Update the row in the grid
+          const updatedData = { ...pending.rowData, ...updatedRole };
+          // Preserve users array
+          updatedData.users = pending.rowData.users || [];
+          
+          gridDiv.__agGridInstance.applyTransaction({ update: [updatedData] });
+          
+        } else {
+          const errorText = await response.text();
+          alert("Failed to update role: " + errorText);
+        }
+      } catch (error) {
+        console.error("Error updating role:", error);
+        alert("Network error - please try again.");
+      } finally {
+        bootstrap.Modal.getInstance(document.getElementById("user-roles-editRoleModal")).hide();
+        delete gridDiv.__pendingEdit;
+      }
+    });
+  
+    document.getElementById("user-roles-confirmDeleteBtn").addEventListener("click", async () => {
+      const gridDiv = document.querySelector("#user-roles-grid");
+      const pending  = gridDiv.__pendingDelete;
+      if (!pending) return;                 // should not happen, but safe-guard
+
+      try {
+        // Call your FastAPI DELETE endpoint
+        const baseDeleteUrl = "{{ url_for('delete_user_role_by_id', role_id='PLACEHOLDER') }}".replace('PLACEHOLDER', pending.roleId);
+        const resp = await fetch(baseDeleteUrl, { method: "DELETE" });
+
+        if (resp.status === 204 || resp.ok) {
+          // Remove the row locally without reloading the whole grid
+          gridDiv.__agGridInstance.applyTransaction({ remove: [pending.rowNode.data] });
+        } else {
+          const txt = await resp.text();
+          alert("Delete failed: " + txt);
+        }
+      } catch (err) {
+        console.error("Network/JS error while deleting:", err);
+        alert("Network error – please try again.");
+      } finally {
+        //Always close modal and clear the flag
+        bootstrap.Modal.getInstance(
+          document.getElementById("user-roles-confirmDeleteModal")
+        ).hide();
+        delete gridDiv.__pendingDelete;
+      }
+    });
+    
+    document.addEventListener('DOMContentLoaded', function() {
+      // Get all sidebar buttons
+      const sidebarButtons = document.querySelectorAll('.sidebar-btn');
+      const contentSections = document.querySelectorAll('.content-section');
+      const welcomeContent = document.getElementById('welcome-content');
+      
+      // Add click event listeners to sidebar buttons
+      sidebarButtons.forEach(button => {
+        button.addEventListener('click', function() {
+          const contentType = this.dataset.content;
+          console.log(contentType)
+          // Remove active class from all buttons
+          sidebarButtons.forEach(btn => btn.classList.remove('active'));
+          
+          // Add active class to clicked button
+          this.classList.add('active');
+          
+          // Hide welcome content and all other content sections
+          welcomeContent.style.display = 'none';
+          contentSections.forEach(section => section.style.display = 'none');
+          
+          // Show the selected content section
+          const targetContent = document.getElementById(contentType + '-content');
+          if (targetContent) {
+            targetContent.style.display = 'block';
+            
+            if (contentType === 'user-roles') {
+              loadRoles();
+            }
+          }
+        });
+      });
+    });
+  </script> -->
+
+  <script>
+    class UserRoleManager {
+        constructor() {
+            this.gridDiv = document.querySelector("#user-roles-grid");
+            this.preferredColumnOrder = [
+                "id", "rolename", "can_create", "can_read", 
+                "can_update", "can_delete", "notes", "users"
+            ];
+            this.initializeEventListeners();
+        }
+
+        initializeEventListeners() {
+            // Add Role Button
+            document.getElementById("user-roles-addRoleBtn")?.addEventListener("click", () => {
+                this.showAddRoleModal();
+            });
+
+            // Save Add Role
+            document.getElementById("user-roles-saveAddBtn")?.addEventListener("click", () => {
+                this.handleSaveNewRole();
+            });
+
+            // Save Edit Role
+            document.getElementById("user-roles-saveEditBtn")?.addEventListener("click", () => {
+                this.handleSaveEditRole();
+            });
+
+            // Confirm Delete
+            document.getElementById("user-roles-confirmDeleteBtn")?.addEventListener("click", () => {
+                this.handleConfirmDelete();
+            });
+        }
+
+        async loadRoles() {
+            try {
+                const data = await this.fetchRoles();
+                const gridOptions = this.createGridOptions(data);
+                this.initializeGrid(gridOptions);
+            } catch (error) {
+                this.handleError("Error loading roles", error);
+            }
+        }
+
+        async fetchRoles() {
+            const response = await fetch("{{ url_for('get_all_user_roles') }}", {
+                method: 'GET',
+                headers: { 'Accept': 'application/json' }
+            });
+
+            if (!response.ok) {
+                throw new Error(`Failed to fetch roles: ${response.status}`);
+            }
+
+            return await response.json();
+        }
+
+        createGridOptions(data) {
+            const hasData = Array.isArray(data) && data.length > 0;
+            return {
+                rowData: hasData ? data : [],
+                columnDefs: hasData ? this.createColumnDefs(data[0]) : [],
+                defaultColDef: {
+                    resizable: true,
+                    flex: 1,
+                    minWidth: 100
+                },
+                getRowId: (params) => params.data.id,
+                onCellClicked: this.handleCellClick.bind(this)
+            };
+        }
+
+        createColumnDefs(firstRow) {
+            const allKeys = Object.keys(firstRow);
+            const orderedKeys = [
+                ...this.preferredColumnOrder,
+                ...allKeys.filter(key => !this.preferredColumnOrder.includes(key))
+            ];
+
+            const columnDefs = orderedKeys.map(key => this.createColumnDef(key));
+            columnDefs.push(this.createActionsColumn());
+            
+            return columnDefs;
+        }
+
+        createColumnDef(key) {
+            if (key === "users") {
+                return {
+                    field: "users",
+                    headerName: "USERS",
+                    valueGetter: (params) => `${params.data.users?.length || 0} user(s)`,
+                    sortable: true,
+                    filter: false
+                };
+            }
+
+            return {
+                field: key,
+                headerName: key.replace(/_/g, " ").toUpperCase(),
+                sortable: true,
+                filter: true,
+                resizable: true
+            };
+        }
+
+        createActionsColumn() {
+            return {
+                headerName: 'Actions',
+                field: 'actions',
+                minWidth: 140,
+                cellRenderer: () => `
+                    <div class="btn-group" role="group">
+                        <button class="btn btn-sm btn-outline-primary" 
+                                title="Edit" data-action="edit">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline-danger" 
+                                title="Delete" data-action="delete">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline-info" 
+                                title="Show Users" data-action="show-users">
+                            <i class="fas fa-user"></i>
+                        </button>
+                    </div>
+                `
+            };
+        }
+
+        handleCellClick(params) {
+            const button = params.event.target.closest("button");
+            if (!button || !button.dataset.action) return;
+
+            const action = button.dataset.action;
+            const actionHandlers = {
+                'show-users': () => this.showUsers(params.data.users || []),
+                'edit': () => this.showEditRoleModal(params),
+                'delete': () => this.showDeleteConfirmation(params)
+            };
+
+            const handler = actionHandlers[action];
+            if (handler) handler();
+        }
+
+        showUsers(users) {
+            const usersList = document.getElementById("user-roles-usersList");
+            usersList.innerHTML = "";
+
+            if (users.length === 0) {
+                usersList.innerHTML = "<li class='list-group-item text-muted'>No users assigned</li>";
+            } else {
+                users.forEach(user => {
+                    const listItem = this.createUserListItem(user);
+                    usersList.appendChild(listItem);
+                });
+            }
+
+            const modal = bootstrap.Modal.getOrCreateInstance(
+                document.getElementById("user-roles-showUsersModal")
+            );
+            modal.show();
+        }
+
+        createUserListItem(user) {
+            const li = document.createElement("li");
+            li.className = "list-group-item";
+            li.innerHTML = `
+                <strong>${user.name} ${user.surname}</strong>
+                <div><small>${user.email} – ${user.usertype}</small></div>
+            `;
+            return li;
+        }
+
+        showAddRoleModal() {
+            document.getElementById("user-roles-addRoleForm").reset();
+            const modal = bootstrap.Modal.getOrCreateInstance(
+                document.getElementById("user-roles-addRoleModal")
+            );
+            modal.show();
+        }
+
+        showEditRoleModal(params) {
+            // Store edit context
+            this.gridDiv.__pendingEdit = {
+                roleId: params.data.id,
+                rowData: params.data,
+                rowNode: params.node
+            };
+
+            // Populate form fields
+            const formFields = {
+                editRoleName: params.data.rolename || "",
+                editNotes: params.data.notes || "",
+                editCanCreate: params.data.can_create || false,
+                editCanRead: params.data.can_read || false,
+                editCanUpdate: params.data.can_update || false,
+                editCanDelete: params.data.can_delete || false
+            };
+
+            Object.entries(formFields).forEach(([fieldId, value]) => {
+                const element = document.getElementById("user-roles-" + fieldId);
+                if (element) {
+                    if (element.type === 'checkbox') {
+                        element.checked = value;
+                    } else {
+                        element.value = value;
+                    }
+                }
+            });
+
+            const modal = bootstrap.Modal.getOrCreateInstance(
+                document.getElementById("user-roles-editRoleModal")
+            );
+            modal.show();
+        }
+
+        showDeleteConfirmation(params) {
+            this.gridDiv.__pendingDelete = {
+                roleId: params.data.id,
+                rowNode: params.node
+            };
+
+            const modal = bootstrap.Modal.getOrCreateInstance(
+                document.getElementById("user-roles-confirmDeleteModal")
+            );
+            modal.show();
+        }
+
+        async handleSaveNewRole() {
+            const formData = this.getFormData('add');
+
+            if (!formData.rolename) {
+                alert("Role name is required");
+                return;
+            }
+
+            try {
+                const response = await fetch("{{ url_for('create_new_user_role') }}", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(formData)
+                });
+
+                if (response.ok) {
+                    const newRole = await response.json();
+                    const success = this.addNewRole(newRole);
+                    
+                    if (!success) {
+                        console.warn("Failed to add role to grid, reloading grid data");
+                        await this.loadRoles();
+                    }
+
+                    this.closeModal("user-roles-addRoleModal");
+                    document.getElementById("user-roles-addRoleForm").reset();
+                } else {
+                    const errorText = await response.text();
+                    alert("Failed to create role: " + errorText);
+                }
+            } catch (error) {
+                this.handleError("Error creating role", error);
+            }
+        }
+
+        async handleSaveEditRole() {
+            const pending = this.gridDiv.__pendingEdit;
+            if (!pending) return;
+
+            const formData = this.getFormData('edit');
+
+            if (!formData.rolename) {
+                alert("Role name is required");
+                return;
+            }
+
+            try {
+                const baseUpdateUrl = "{{ url_for('update_existing_user_role', role_id='PLACEHOLDER') }}"
+                    .replace('PLACEHOLDER', pending.roleId);
+                
+                const response = await fetch(baseUpdateUrl, {
+                    method: "PUT",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(formData)
+                });
+
+                if (response.ok) {
+                    const updatedRole = await response.json();
+                    const updatedData = { ...pending.rowData, ...updatedRole };
+                    updatedData.users = pending.rowData.users || [];
+                    
+                    this.gridDiv.__agGridInstance.applyTransaction({ update: [updatedData] });
+                } else {
+                    const errorText = await response.text();
+                    alert("Failed to update role: " + errorText);
+                }
+            } catch (error) {
+                this.handleError("Error updating role", error);
+            } finally {
+                this.closeModal("user-roles-editRoleModal");
+                delete this.gridDiv.__pendingEdit;
+            }
+        }
+
+        async handleConfirmDelete() {
+            const pending = this.gridDiv.__pendingDelete;
+            if (!pending) return;
+
+            try {
+                const baseDeleteUrl = "{{ url_for('delete_user_role_by_id', role_id='PLACEHOLDER') }}"
+                    .replace('PLACEHOLDER', pending.roleId);
+                
+                const response = await fetch(baseDeleteUrl, { method: "DELETE" });
+
+                if (response.status === 204 || response.ok) {
+                    this.gridDiv.__agGridInstance.applyTransaction({ 
+                        remove: [pending.rowNode.data] 
+                    });
+                } else {
+                    const errorText = await response.text();
+                    alert("Delete failed: " + errorText);
+                }
+            } catch (error) {
+                this.handleError("Error deleting role", error);
+            } finally {
+                this.closeModal("user-roles-confirmDeleteModal");
+                delete this.gridDiv.__pendingDelete;
+            }
+        }
+
+        getFormData(type) {
+            const prefix = type === 'add' ? 'addRole' : 'editRole';
+            return {
+                rolename: document.getElementById(`user-roles-${prefix}Name`).value.trim(),
+                notes: document.getElementById(`user-roles-${prefix === 'addRole' ? 'add' : 'edit'}Notes`).value.trim(),
+                can_create: document.getElementById(`user-roles-${prefix === 'addRole' ? 'add' : 'edit'}CanCreate`).checked,
+                can_read: document.getElementById(`user-roles-${prefix === 'addRole' ? 'add' : 'edit'}CanRead`).checked,
+                can_update: document.getElementById(`user-roles-${prefix === 'addRole' ? 'add' : 'edit'}CanUpdate`).checked,
+                can_delete: document.getElementById(`user-roles-${prefix === 'addRole' ? 'add' : 'edit'}CanDelete`).checked
+            };
+        }
+
+        closeModal(modalId) {
+            const modal = bootstrap.Modal.getInstance(document.getElementById(modalId));
+            if (modal) modal.hide();
+        }
+
+        addNewRole(newRole) {
+            if (!this.gridDiv.__agGridInstance) {
+                console.error("Grid instance not found");
+                return false;
+            }
+
+            newRole.users = newRole.users || [];
+
+            const currentColumnDefs = this.gridDiv.__agGridInstance.getColumnDefs();
+            const isEmptyGrid = !currentColumnDefs || currentColumnDefs.length === 0;
+
+            if (isEmptyGrid) {
+                this.reinitializeGridWithData([newRole]);
+            } else {
+                this.gridDiv.__agGridInstance.applyTransaction({ add: [newRole] });
+            }
+
+            return true;
+        }
+
+        reinitializeGridWithData(data) {
+            const gridOptions = this.createGridOptions(data);
+            this.initializeGrid(gridOptions);
+        }
+
+        initializeGrid(gridOptions) {
+            if (this.gridDiv.__agGridInstance) {
+                this.gridDiv.__agGridInstance.destroy();
+            }
+            this.gridDiv.__agGridInstance = agGrid.createGrid(this.gridDiv, gridOptions);
+        }
+
+        handleError(message, error) {
+            console.error(message, error);
+            alert("Network error - please try again.");
+        }
+    }
+
+    class SidebarManager {
+        constructor() {
+            this.sidebarButtons = document.querySelectorAll('.sidebar-btn');
+            this.contentSections = document.querySelectorAll('.content-section');
+            this.welcomeContent = document.getElementById('welcome-content');
+            this.initializeEventListeners();
+        }
+
+        initializeEventListeners() {
+            this.sidebarButtons.forEach(button => {
+                button.addEventListener('click', (e) => {
+                    this.handleSidebarClick(e.currentTarget);
+                });
+            });
+        }
+
+        handleSidebarClick(button) {
+            const contentType = button.dataset.content;
+            
+            // Update active states
+            this.sidebarButtons.forEach(btn => btn.classList.remove('active'));
+            button.classList.add('active');
+            
+            // Hide all content
+            this.welcomeContent.style.display = 'none';
+            this.contentSections.forEach(section => section.style.display = 'none');
+            
+            // Show selected content
+            const targetContent = document.getElementById(contentType + '-content');
+            if (targetContent) {
+                targetContent.style.display = 'block';
+                this.handleContentTypeSpecificActions(contentType);
+            }
+        }
+
+        handleContentTypeSpecificActions(contentType) {
+            switch (contentType) {
+                case 'user-roles':
+                    if (window.userRoleManager) {
+                        window.userRoleManager.loadRoles();
+                    }
+                    break;
+                case 'users':
+                    // Add user management initialization here
+                    break;
+                case 'user-skills':
+                    // Add user skills initialization here
+                    break;
+                case 'modules':
+                    // Add modules initialization here
+                    break;
+            }
+        }
+    }
+
+    // Application initialization
+    class UsersPermissionsApp {
+        constructor() {
+            this.initializeManagers();
+        }
+
+        initializeManagers() {
+            // Initialize managers
+            this.sidebarManager = new SidebarManager();
+            this.userRoleManager = new UserRoleManager();
+            
+            // Make managers globally accessible if needed
+            window.userRoleManager = this.userRoleManager;
+            window.sidebarManager = this.sidebarManager;
+        }
+    }
+
+    // Initialize the application when DOM is ready
+    document.addEventListener('DOMContentLoaded', function() {
+        window.usersPermissionsApp = new UsersPermissionsApp();
+    });
+  </script>
+{% endblock %}
