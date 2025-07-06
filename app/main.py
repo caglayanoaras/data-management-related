@@ -8,7 +8,7 @@ from fastapi.responses import HTMLResponse, RedirectResponse
 from starlette.middleware.sessions import SessionMiddleware
 from sqlmodel import Session, select
 
-from app.models import User, UserInDB, Module
+from app.models import UserRead, User, Module
 
 from app.core.database import init_db, get_session
 from app.dependencies.auth import (
@@ -56,13 +56,13 @@ def login_form(request: Request):
 @app.get("/dashboard", include_in_schema=False, name='dashboard', response_class=HTMLResponse)
 async def dashboard(
     request: Request, 
-    current_user: Annotated[User, Depends(get_current_active_user)],
+    current_user: Annotated[UserRead, Depends(get_current_active_user)],
     # db: SessionDep,
 ):
     """
     Show the dashboard with modules that *this* user can access.
     A user’s access is defined by the many‑to‑many relationship
-    UserInDB <-> UserModuleLink <-> Module.
+    User <-> UserModuleLink <-> Module.
     """
 
     return templates.TemplateResponse("dashboard.html", {
@@ -73,13 +73,13 @@ async def dashboard(
 @app.get("/user_profile", include_in_schema=False, name='user_profile', response_class=HTMLResponse)
 async def user_profile(
     request: Request, 
-    current_user: Annotated[User, Depends(get_current_active_user)],
+    current_user: Annotated[UserRead, Depends(get_current_active_user)],
     db: Session = Depends(get_session)
 ):
     # Refresh user data from database
-    db_user = db.exec(select(UserInDB).where(UserInDB.username == current_user.username)).first()
+    db_user = db.exec(select(User).where(User.username == current_user.username)).first()
     if not db_user:
-        raise HTTPException(status_code=404, detail="User not found")
+        raise HTTPException(status_code=404, detail="UserRead not found")
     
     flash_messages = get_flashed_messages(request)
 
@@ -93,21 +93,21 @@ async def user_profile(
 @app.post("/update_profile", include_in_schema=False, name="update_profile", response_class=RedirectResponse)
 async def update_profile(
     request: Request,
-    current_user: User = Depends(get_current_active_user),
+    current_user: UserRead = Depends(get_current_active_user),
     db: Session = Depends(get_session),
     email: str = Form(...),
     profile_image: UploadFile = File(None),
 ):
     try:
         # Refresh user data
-        user = db.exec(select(UserInDB).where(UserInDB.username == current_user.username)).first()
+        user = db.exec(select(User).where(User.username == current_user.username)).first()
         if not user:
-            raise HTTPException(status_code=404, detail="User not found")
+            raise HTTPException(status_code=404, detail="UserRead not found")
         
         # Check if email is being changed
         if email != user.email:
             # Verify new email is not taken
-            existing_user = db.exec(select(UserInDB).where(UserInDB.email == email)).first()
+            existing_user = db.exec(select(User).where(User.email == email)).first()
             if existing_user and existing_user.username != user.username:
                 flash(request, "Email is already in use by another account.", "error")
                 return redirect_to_route(request, "user_profile")
@@ -166,7 +166,7 @@ async def update_profile(
 @app.post("/update_password", include_in_schema=False, name='update_password', response_class=RedirectResponse)
 async def update_password(
     request: Request,
-    current_user: User = Depends(get_current_active_user),
+    current_user: UserRead = Depends(get_current_active_user),
     db: Session = Depends(get_session),
     current_password: str = Form(...),
     new_password: str = Form(...),
@@ -174,9 +174,9 @@ async def update_password(
 ):
     try:
         # Refresh user data to ensure we have the latest
-        user = db.exec(select(UserInDB).where(UserInDB.username == current_user.username)).first()
+        user = db.exec(select(User).where(User.username == current_user.username)).first()
         if not user:
-            flash(request, "User not found.", "error")
+            flash(request, "UserRead not found.", "error")
             return redirect_to_route(request, "user_profile")
         
         if new_password != confirm_password:

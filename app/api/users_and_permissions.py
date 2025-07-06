@@ -19,7 +19,7 @@ from app.dependencies.auth import (
 templates = Jinja2Templates(directory="app/templates")
 
 # Only superadmins are allowed to use this route
-UserDep = Annotated[User, Depends(get_current_superadmin)]
+UserDep = Annotated[UserRead, Depends(get_current_superadmin)]
 SessionDep = Annotated[Session, Depends(get_session)]
 
 users_and_permissions_router = APIRouter(
@@ -65,7 +65,7 @@ def get_user_role_by_id(current_user: UserDep, role_id: int, db: Session = Depen
     if not role:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="User role not found"
+            detail="UserRead role not found"
         )
     
     return role
@@ -97,7 +97,7 @@ def update_existing_user_role(
     if not db_role:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="User role not found"
+            detail="UserRead role not found"
         )
     try:
         return update_role(db=db, db_role=db_role, input_role=role_update)
@@ -115,7 +115,7 @@ def delete_user_role_by_id(current_user: UserDep,role_id: int, db: Session = Dep
     if not delete_role(db, role_id):
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="User role not found"
+            detail="UserRead role not found"
         )
     return {"ok": True}
 #endregion
@@ -131,7 +131,7 @@ def get_user_skill_by_id(current_user: UserDep, skill_id: int, db: Session = Dep
     if not skill:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="User skill not found",
+            detail="UserRead skill not found",
         )
     return skill
 
@@ -151,7 +151,7 @@ def update_existing_user_skill(current_user: UserDep, skill_id: int, skill_updat
     if not db_skill:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="User skill not found",
+            detail="UserRead skill not found",
         )
     try:
         return update_skill(db=db, db_skill=db_skill, input_skill=skill_update)
@@ -166,7 +166,7 @@ def delete_user_skill_by_id(current_user: UserDep, skill_id: int, db: Session = 
     if not delete_skill(db, skill_id):
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="User skill not found",
+            detail="UserRead skill not found",
         )
     return {"ok": True}
 # endregion
@@ -199,14 +199,14 @@ def create_new_user(current_user: UserDep, user_create: UserCreate, db: Session 
     Create a new user.
     """
     try:
-        return create_user(db=db, user_create=user_create)
+        return create_user(db=db, user_create=user_create, created_by=current_user.username)
     except  IntegrityError as e:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail=str(e)
             )
 
-@users_and_permissions_router.put("/users/{username}", name='update_existing_user', response_model=User)
+@users_and_permissions_router.put("/users/{username}", name='update_existing_user', response_model=UserRead)
 def update_existing_user(
     current_user: UserDep,
     username: str,
@@ -220,10 +220,10 @@ def update_existing_user(
     if not db_user:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="User not found"
+            detail="UserRead not found"
         )
     try:
-        return update_user(db=db, db_user=db_user, user_update=user_update)
+        return update_user(db=db, db_user=db_user, user_update=user_update, updated_by=current_user.username)
     except  IntegrityError as e:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
@@ -238,7 +238,7 @@ def delete_user_by_username(current_user: UserDep, username: str, db: Session = 
     if not delete_user(db=db, username=username):
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="User not found"
+            detail="UserRead not found"
         )
     return {"ok": True}
 # endregion

@@ -136,7 +136,7 @@
       
         <!-- User Skills content -->
         <div id="user-skills-content" class="content-section fade-in" style="display: none;">
-          <div class="d-flex justify-content-between align-items-center mb-2">
+          <div class="d-flex justify-content-between align-items-center mb-4">
             <h3 class="mb-0">
               <i class="fas fa-hammer text-warning me-2"></i>
               User Skills Management
@@ -160,6 +160,10 @@
               <i class="fas fa-gears text-secondary me-2"></i>
               Existing Modules
             </h3>
+          </div>
+          <!-- Data Grid container -->
+          <div class="container-flex">            
+            <div id="user-modules-grid" style="height: 600px"></div> 
           </div>
         </div>
 
@@ -201,8 +205,7 @@
                 }
             });
 
-            // Confirm Delete stays unchanged
-            document.getElementById("user-roles-confirmDeleteBtn")?.addEventListener("click", () => {
+            document.getElementById("confirmDeleteBtn")?.addEventListener("click", () => {
                 this.handleConfirmDelete();
             });
 
@@ -319,7 +322,7 @@
         }
 
         showUsers(users) {
-            const usersList = document.getElementById("user-roles-usersList");
+            const usersList = document.getElementById("usersList");
             usersList.innerHTML = "";
 
             if (users.length === 0) {
@@ -332,7 +335,7 @@
             }
 
             const modal = bootstrap.Modal.getOrCreateInstance(
-                document.getElementById("user-roles-showUsersModal")
+                document.getElementById("showUsersModal")
             );
             modal.show();
         }
@@ -363,8 +366,6 @@
                 form.reset();                           // clear previous values
                 titleEl.textContent  = "Add New Role";
                 primaryEl.innerHTML  = '<i class="fas fa-plus me-1"></i> Create Role';
-                primaryEl.classList.remove("btn-warning");
-                primaryEl.classList.add("btn-success");
             } else {
                 /* stash info you already kept in __pendingEdit */
                 this.gridDiv.__pendingEdit = {
@@ -375,8 +376,6 @@
 
                 titleEl.textContent  = "Edit Role";
                 primaryEl.innerHTML  = '<i class="fas fa-save me-1"></i> Save Changes';
-                primaryEl.classList.remove("btn-success");
-                primaryEl.classList.add("btn-warning");
 
                 // populate fields
                 const data = params.data;
@@ -419,7 +418,7 @@
 
                 if (response.ok) {
                     const newRole = await response.json();
-                    const success = this.addNewRole(newRole);
+                    const success = this.addNew(newRole);
                     
                     if (!success) {
                         console.warn("Failed to add role to grid, reloading grid data");
@@ -519,7 +518,7 @@
             if (modal) modal.hide();
         }
 
-        addNewRole(newRole) {
+        addNew(newRole) {
             if (!this.gridDiv.__agGridInstance) {
                 console.error("Grid instance not found");
                 return false;
@@ -560,7 +559,7 @@
     class UserSkillManager {
       constructor() {
         this.gridDiv = document.querySelector("#user-skills-grid");
-        this.preferredColumnOrder = ["id", "skillname", "description", "users"];
+        this.preferredColumnOrder = ["id", "skillname", "skill_level","notes", "users"];
 
         this.currentMode = null;          // "add" | "edit"
         this.skillModal  = bootstrap.Modal.getOrCreateInstance(
@@ -581,6 +580,10 @@
           () => this.currentMode === "add" ? this.handleSaveNewSkill()
                                           : this.handleSaveEditSkill()
         );
+
+        document.getElementById("confirmDeleteBtn")?.addEventListener("click", () => {
+                this.handleConfirmDelete();
+            });
       }
 
       async loadSkills() {
@@ -694,7 +697,7 @@
       }
 
       showUsers(users) {
-        const usersList = document.getElementById("user-roles-usersList");
+        const usersList = document.getElementById("usersList");
         usersList.innerHTML = "";
 
         if (users.length === 0) {
@@ -707,7 +710,7 @@
         }
 
         const modal = bootstrap.Modal.getOrCreateInstance(
-          document.getElementById("user-roles-showUsersModal")
+          document.getElementById("showUsersModal")
         );
         modal.show();
       }
@@ -738,8 +741,6 @@
           form.reset();                           // clear previous values
           titleEl.textContent  = "Add New Skill";
           primaryEl.innerHTML  = '<i class="fas fa-plus me-1"></i> Create Skill';
-          primaryEl.classList.remove("btn-warning");
-          primaryEl.classList.add("btn-success");
         } else {
           /* stash info you already kept in __pendingEdit */
           this.gridDiv.__pendingEdit = {
@@ -750,13 +751,13 @@
 
           titleEl.textContent  = "Edit Skill";
           primaryEl.innerHTML  = '<i class="fas fa-save me-1"></i> Save Changes';
-          primaryEl.classList.remove("btn-success");
-          primaryEl.classList.add("btn-warning");
+
 
           // populate fields
           const data = params.data;
-          document.getElementById("user-skills-skillName").value      = data.skillname || "";
-          document.getElementById("user-skills-description").value    = data.description     || "";
+          document.getElementById("user-skills-skillname").value      = data.skillname || "";
+          document.getElementById("user-skills-skilllevel").value      = data.skill_level || "";
+          document.getElementById("user-skills-notes").value    = data.notes     || "";
         }
         this.skillModal.show();
       }
@@ -790,7 +791,7 @@
 
           if (response.ok) {
             const newSkill = await response.json();
-            const success = this.addNewRole(newSkill);
+            const success = this.addNew(newSkill);
             
             if (!success) {
               console.warn("Failed to add skill to grid, reloading grid data");
@@ -875,8 +876,9 @@
 
       getFormData() {
         return {
-          skillname   : document.getElementById("user-skills-skillName").value.trim(),
-          description : document.getElementById("user-skills-description").value.trim()
+          skillname   : document.getElementById("user-skills-skillname").value.trim(),
+          skill_level : document.getElementById("user-skills-skilllevel").value,
+          notes : document.getElementById("user-skills-notes").value.trim(),
         };
       }
 
@@ -885,7 +887,7 @@
         if (modal) modal.hide();
       }
 
-      addNewRole(newSkill) {
+      addNew(newSkill) {
         if (!this.gridDiv.__agGridInstance) {
           console.error("Grid instance not found");
           return false;
@@ -904,6 +906,7 @@
 
         return true;
       }
+
       reinitializeGridWithData(data) {
         const gridOptions = this.createGridOptions(data);
         this.initializeGrid(gridOptions);
@@ -920,6 +923,160 @@
         console.error(message, error);
         alert("Network error - please try again.");
       }
+    }
+
+    class UserModuleManager {
+      constructor() {
+        this.gridDiv = document.querySelector("#user-modules-grid");
+        this.preferredColumnOrder = ["id", "title", "description", "users"];
+        this.initializeEventListeners();
+      }
+
+      initializeEventListeners() {
+
+      }
+
+      async loadModules() {
+        try {
+          const data = await this.fetchModules();
+          const gridOptions = this.createGridOptions(data);
+          this.initializeGrid(gridOptions);
+        } catch (error) {
+          this.handleError("Error loading modules", error);
+        }
+      }
+
+      async fetchModules() {
+        const response = await fetch("{{ url_for('get_all_modules') }}", {
+          method: 'GET',
+          headers: { 'Accept': 'application/json' }
+        });
+
+        if (!response.ok) {
+          throw new Error(`Failed to fetch modules: ${response.status}`);
+        }
+
+        return await response.json();
+      }
+
+      createGridOptions(data) {
+        const hasData = Array.isArray(data) && data.length > 0;
+        return {
+          rowData: hasData ? data : [],
+          columnDefs: hasData ? this.createColumnDefs(data[0]) : [],
+          defaultColDef: {
+            resizable: true,
+            flex: 1,
+            minWidth: 100
+          },
+          getRowId: (params) => params.data.id,
+          onCellClicked: this.handleCellClick.bind(this)
+        };
+      }
+
+      createColumnDefs(firstRow) {
+        const allKeys = Object.keys(firstRow);
+        const orderedKeys = [
+          ...this.preferredColumnOrder,
+          ...allKeys.filter(key => !this.preferredColumnOrder.includes(key))
+        ];
+
+        const columnDefs = orderedKeys.map(key => this.createColumnDef(key));
+        columnDefs.push(this.createActionsColumn());
+        
+        return columnDefs;
+      }
+
+      createColumnDef(key) {
+        if (key === "users") {
+          return {
+            field: "users",
+            headerName: "USERS",
+            valueGetter: (params) => `${params.data.users?.length || 0} user(s)`,
+            sortable: true,
+            filter: false
+          };
+        }
+
+        return {
+          field: key,
+          headerName: key.replace(/_/g, " ").toUpperCase(),
+          sortable: true,
+          filter: true,
+          resizable: true
+        };
+      }
+
+      createActionsColumn() {
+        return {
+          headerName: 'Actions',
+          field: 'actions',
+          minWidth: 140,
+          cellRenderer: () => `
+              <div class="btn-group" role="group">
+                  <button class="btn btn-sm btn-outline-info" 
+                          title="Show Users" data-action="show-users">
+                      <i class="fas fa-user"></i>
+                  </button>
+              </div>
+          `
+        };
+      }
+
+      handleCellClick(params) {
+        const button = params.event.target.closest("button");
+        if (!button || !button.dataset.action) return;
+
+        const action = button.dataset.action;
+        const actionHandlers = {
+            'show-users': () => this.showUsers(params.data.users || []),
+        };
+
+        const handler = actionHandlers[action];
+        if (handler) handler();
+      }
+
+      showUsers(users) {
+        const usersList = document.getElementById("usersList");
+        usersList.innerHTML = "";
+
+        if (users.length === 0) {
+          usersList.innerHTML = "<li class='list-group-item text-muted'>No users assigned</li>";
+        } else {
+          users.forEach(user => {
+            const listItem = this.createUserListItem(user);
+            usersList.appendChild(listItem);
+          });
+        }
+
+        const modal = bootstrap.Modal.getOrCreateInstance(
+          document.getElementById("showUsersModal")
+        );
+        modal.show();
+      }
+
+      createUserListItem(user) {
+        const li = document.createElement("li");
+        li.className = "list-group-item";
+        li.innerHTML = `
+          <strong>${user.name} ${user.surname}</strong>
+          <div><small>${user.email} – ${user.usertype}</small></div>
+        `;
+        return li;
+      }
+
+      initializeGrid(gridOptions) {
+        if (this.gridDiv.__agGridInstance) {
+          this.gridDiv.__agGridInstance.destroy();
+        }
+        this.gridDiv.__agGridInstance = agGrid.createGrid(this.gridDiv, gridOptions);
+      }
+
+      handleError(message, error) {
+        console.error(message, error);
+        alert("Network error - please try again.");
+      }    
+      
     }
 
     class SidebarManager {
@@ -971,12 +1128,12 @@
                     window.userSkillManager.loadSkills();
                     break;
                 case 'modules':
-                    // Add modules initialization here
+                    window.userModuleManager.loadModules();
                     break;
             }
         }
     }
-
+ 
     // Application initialization
     class UsersPermissionsApp {
         constructor() {
@@ -988,11 +1145,13 @@
             this.sidebarManager = new SidebarManager();
             this.userRoleManager = new UserRoleManager();
             this.userSkillManager = new UserSkillManager();
+            this.userModuleManager = new UserModuleManager();
 
             // Make managers globally accessible if needed
             window.userRoleManager = this.userRoleManager;
             window.userSkillManager = this.userSkillManager;
             window.sidebarManager = this.sidebarManager;
+            window.userModuleManager = this.userModuleManager;
         }
     }
 

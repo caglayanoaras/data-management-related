@@ -15,7 +15,7 @@ from typing import Annotated
 from passlib.context import CryptContext
 
 from app.core.config import settings
-from app.models import UserInDB, User, UserRead
+from app.models import User, UserRead
 from app.core.database import get_session
 
 auth_router = APIRouter(
@@ -47,13 +47,13 @@ class Token(BaseModel):
 class TokenData(BaseModel):
     username: str
 
-def get_user(db: Session, username: str) -> UserInDB|None:
-    statement = select(UserInDB).where(UserInDB.username == username)
+def get_user(db: Session, username: str) -> User|None:
+    statement = select(User).where(User.username == username)
     userindb = db.exec(statement).first()
     if userindb:
         return userindb
 
-def authenticate_user(db: Session, username: str, password: str) -> UserInDB|bool:
+def authenticate_user(db: Session, username: str, password: str) -> User|bool:
     userindb = get_user(db, username)
     if not userindb:
         return False
@@ -75,7 +75,7 @@ async def get_current_user(
         db: SessionDep,
         token: Annotated[str|None, Depends(oauth2_scheme)],
         cookie_token: Annotated[str|None, Cookie(alias=settings.COOKIE_NAME, description="You only need to fill this parameter if you're not logged in. Otherwise, the cookie existing in your browser will provide it.")] = None
-        ) -> User:
+        ) -> UserRead:
 
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
@@ -102,15 +102,15 @@ async def get_current_user(
     return user
 
 async def get_current_active_user(
-    current_user: Annotated[User, Depends(get_current_user)],
-) -> User:
+    current_user: Annotated[UserRead, Depends(get_current_user)],
+) -> UserRead:
     if current_user.is_active == False:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Inactive user")
     return current_user
 
 async def get_current_superadmin(
-    current_user: Annotated[User, Depends(get_current_active_user)]
-) -> User:
+    current_user: Annotated[UserRead, Depends(get_current_active_user)]
+) -> UserRead:
     """
     Dependency to get the current active user and check if they are a superadmin.
 

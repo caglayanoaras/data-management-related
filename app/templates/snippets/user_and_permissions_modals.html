@@ -1,5 +1,5 @@
 <!-- Show Users Modal -->
-<div class="modal fade" id="user-roles-showUsersModal" tabindex="-1">
+<div class="modal fade" id="showUsersModal" tabindex="-1">
   <div class="modal-dialog modal-dialog-scrollable modal-lg">
     <div class="modal-content">
       <div class="modal-header">
@@ -7,7 +7,7 @@
         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
       </div>
       <div class="modal-body">
-        <ul id="user-roles-usersList" class="list-group"></ul>
+        <ul id="usersList" class="list-group"></ul>
       </div>
       <div class="modal-footer">
         <button class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -29,7 +29,7 @@
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-        <button id="user-roles-confirmDeleteBtn" class="btn btn-danger">Delete</button>
+        <button id="confirmDeleteBtn" class="btn btn-danger">Delete</button>
       </div>
     </div>
   </div>
@@ -106,9 +106,8 @@
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-        <button type="button" class="btn btn-primary" id="user-roles-saveRoleBtn">
-          <i class="fas fa-save me-1"></i>
-          Save Changes
+        <button type="button" class="btn btn-success" id="user-roles-saveRoleBtn">
+          <i class="fas fa-save me-1"></i>Save Changes
         </button>
       </div>
     </div>
@@ -127,21 +126,26 @@
       <div class="modal-body">
         <form id="user-skills-skillForm">
           <div class="mb-3">
-            <label for="user-skills-skillName" class="form-label">Skill Name</label>
-            <input id="user-skills-skillName" class="form-control" required>
+            <label for="user-skills-skillname" class="form-label">Skill Name</label>
+            <input id="user-skills-skillname" class="form-control" required>
           </div>
 
           <div class="mb-3">
-            <label for="user-skills-description" class="form-label">Description</label>
-            <textarea id="user-skills-description" class="form-control" rows="2"></textarea>
+            <label for="user-skills-skilllevel" class="form-label">Skill Level</label>
+            <input id="user-skills-skilllevel" class="form-control" required>
+          </div>
+
+          <div class="mb-3">
+            <label for="user-skills-notes" class="form-label">Notes</label>
+            <textarea class="form-control" id="user-skills-notes" rows="2"></textarea>
           </div>
         </form>
       </div>
 
       <div class="modal-footer">
         <button class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-        <button id="user-skills-saveSkillBtn" class="btn btn-primary">
-          <i class="fas fa-save me-1"></i>Save
+        <button id="user-skills-saveSkillBtn" class="btn btn-warning">
+          <i class="fas fa-save me-1"></i>Save Changes
         </button>
       </div>
     </div>

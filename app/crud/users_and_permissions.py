@@ -1,22 +1,22 @@
 from sqlmodel import Session, select
-from typing import Any
+from datetime import datetime, timezone
 from sqlalchemy.orm import selectinload
 from fastapi import HTTPException, status
 from app.models import (
-    UserRole, UserRoleCreate, UserRoleUpdate,
-    UserSkill, UserSkillCreate, UserSkillUpdate,
-    UserInDB, UserCreate, UserType, UserUpdate, User,
+    UserRole, UserRoleCreate, UserRoleUpdate, UserRoleRead,
+    UserSkill, UserSkillCreate, UserSkillUpdate, UserSkillRead,
+    User, UserCreate, UserType, UserUpdate, UserRead,
     Module, ModuleRead)
 
 from app.dependencies.auth import get_password_hash
 
 
 # region userrole crud
-def read_role(db: Session, role_id: int) -> UserRole | None:
+def read_role(db: Session, role_id: int) -> UserRoleRead | None:
     statement = select(UserRole).options(selectinload(UserRole.users)).where(UserRole.id == role_id)
     return db.exec(statement).first()
 
-def read_all_roles(db: Session) -> list[UserRole]:
+def read_all_roles(db: Session) -> list[UserRoleRead]:
     statement = select(UserRole).options(selectinload(UserRole.users))
     return db.exec(statement).all()
 
@@ -58,7 +58,7 @@ def delete_role(db: Session, role_id: int) -> bool:
 #endregion
 
 # region userskill crud
-def read_skill(db: Session, skill_id: int) -> UserSkill | None:
+def read_skill(db: Session, skill_id: int) -> UserSkillRead | None:
     statement = (
         select(UserSkill)
         .options(selectinload(UserSkill.users))
@@ -66,7 +66,7 @@ def read_skill(db: Session, skill_id: int) -> UserSkill | None:
     )
     return db.exec(statement).first()
 
-def read_all_skills(db: Session) -> list[UserSkill]:
+def read_all_skills(db: Session) -> list[UserSkillRead]:
     statement = select(UserSkill).options(selectinload(UserSkill.users))
     return db.exec(statement).all()
 
@@ -125,32 +125,32 @@ def delete_skill(db: Session, skill_id: int) -> bool:
 #endregion
 
 # region user crud
-def read_user(db: Session, username: str) -> UserInDB | None:
-    statement = select(UserInDB).options(
-        selectinload(UserInDB.roles), 
-        selectinload(UserInDB.modules),
-        selectinload(UserInDB.skills)).where(UserInDB.username == username)
+def read_user(db: Session, username: str) -> UserRead | None:
+    statement = select(User).options(
+        selectinload(User.roles), 
+        selectinload(User.modules),
+        selectinload(User.skills)).where(User.username == username)
     return db.exec(statement).first()
 
-def read_all_users(db: Session) -> list[User]:
-    statement = select(UserInDB).options(
-        selectinload(UserInDB.roles), 
-        selectinload(UserInDB.modules),
-        selectinload(UserInDB.skills))
+def read_all_users(db: Session) -> list[UserRead]:
+    statement = select(User).options(
+        selectinload(User.roles), 
+        selectinload(User.modules),
+        selectinload(User.skills))
     return db.exec(statement).all()
 
-def create_user(*, db: Session, user_create: UserCreate) -> UserInDB:
+def create_user(*, db: Session, user_create: UserCreate, created_by:str) -> User:
     # Check for existing username/email
-    if db.exec(select(UserInDB).where(
-        (UserInDB.username == user_create.username) |
-        (UserInDB.email == user_create.email)
+    if db.exec(select(User).where(
+        (User.username == user_create.username) |
+        (User.email == user_create.email)
     )).first():
         raise HTTPException(status_code=400, detail="Username or email already exists")
 
     # Create user object
-    user_data = user_create.model_dump(exclude={"pw", "role_ids", "module_ids"})
+    user_data = user_create.model_dump(exclude={"pw", "role_ids", "module_ids", "skill_ids"})
     hashed_pw = get_password_hash(user_create.pw)
-    db_user = UserInDB(**user_data, hashed_pw=hashed_pw)
+    db_user = User(**user_data, hashed_pw=hashed_pw, created_by=created_by, last_modified_by=created_by)
 
     # Super‑admin gets *all* existing modules (ignores module_ids)
     if user_create.usertype == UserType.superadmin:
@@ -181,7 +181,7 @@ def create_user(*, db: Session, user_create: UserCreate) -> UserInDB:
     db.refresh(db_user)
     return db_user
 
-def update_user(*, db: Session, db_user: UserInDB, user_update: UserUpdate) -> UserInDB:
+def update_user(*, db: Session, db_user: User, user_update: UserUpdate, updated_by:str) -> User:
     """
     Partially update a user (PATCH‑style).
 
@@ -191,13 +191,15 @@ def update_user(*, db: Session, db_user: UserInDB, user_update: UserUpdate) -> U
     • If the resulting usertype is `superadmin`, links **all** modules
     """
     if user_update.username and user_update.username != db_user.username:
-        if db.exec(select(UserInDB).where(UserInDB.username == user_update.username)).first():
+        if db.exec(select(User).where(User.username == user_update.username)).first():
             raise HTTPException(status_code=400, detail="Username already exists")
     if user_update.email and user_update.email != db_user.email:
-        if db.exec(select(UserInDB).where(UserInDB.email == user_update.email)).first():
+        if db.exec(select(User).where(User.email == user_update.email)).first():
             raise HTTPException(status_code=400, detail="Email already exists")
 
     data = user_update.model_dump(exclude_unset=True, exclude={"roles", "modules", "skills"})
+    data["last_modified_at"] = datetime.now(timezone.utc)
+    data["last_modified_by"] = updated_by
     db_user.sqlmodel_update(data)
 
     # Determine the *new* usertype (may have been updated above)
@@ -246,7 +248,7 @@ def delete_user(*, db: Session, username: str, protect_superadmin: bool = True) 
 
     if not user:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
-                            detail=f"User with username={user} not found")
+                            detail=f"UserRead with username={user} not found")
 
     if protect_superadmin and user.usertype == UserType.superadmin:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,

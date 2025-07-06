@@ -9,7 +9,7 @@ from sqlmodel import Session, select
 from app.core.config import settings
 from app.core.database import get_session
 from app.crud.users_and_permissions import *
-from app.models import User, UserInDB, Module
+from app.models import User
 from app.dependencies.auth import (
     get_current_active_user, 
     )

@@ -7,7 +7,7 @@ from sqlalchemy import Column, ForeignKey
 class UserRoleLink(SQLModel, table=True):
     user_id: int = Field(
         sa_column=Column(
-            ForeignKey("userindb.id", ondelete="CASCADE"),
+            ForeignKey("user.id", ondelete="CASCADE"),
             primary_key=True
         )
     )
@@ -21,7 +21,7 @@ class UserRoleLink(SQLModel, table=True):
 class UserSkillLink(SQLModel, table=True):
     user_id: int = Field(
         sa_column=Column(
-            ForeignKey("userindb.id", ondelete="CASCADE"),
+            ForeignKey("user.id", ondelete="CASCADE"),
             primary_key=True
         )
     )
@@ -35,7 +35,7 @@ class UserSkillLink(SQLModel, table=True):
 class UserModuleLink(SQLModel, table=True):
     user_id: int = Field(
         sa_column=Column(
-            ForeignKey("userindb.id", ondelete="CASCADE"),
+            ForeignKey("user.id", ondelete="CASCADE"),
             primary_key=True,
         )
     )
@@ -52,23 +52,26 @@ class UserType(str, Enum):
     mp_admin    = "mp_admin"
     regular    = "regular"
 
-
 class UserShortBase(SQLModel):
     username:    str           = Field(index=True, unique=True)
     name:        str
     surname:     str
+    email:       EmailStr       = Field(unique=True)
+    usertype:    UserType
 
-class UserBaseImageless(UserShortBase):
-    email:       EmailStr      = Field(unique=True)
+class UserImagelessBase(UserShortBase):
     title:       str
     usertype:    UserType
-    is_active:   bool          = Field(default=True)
-    created_at:  datetime      = Field(default_factory=lambda: datetime.now(timezone.utc))
+    is_active:   bool           = Field(default=True)
 
-class UserBase(UserBaseImageless):
+class UserBase(UserImagelessBase):
     profile_image_path: str    = Field(default="default_profile_image.png")
+    created_at:  datetime       = Field(default_factory=lambda: datetime.now(timezone.utc))
+    created_by:  str
+    last_modified_at:  datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    last_modified_by:  str
 
-class UserInDB(UserBase, table=True):
+class User(UserBase, table=True):
     id:          int | None    = Field(default=None, primary_key=True)
     hashed_pw:   str
 
@@ -90,20 +93,17 @@ class UserInDB(UserBase, table=True):
         sa_relationship_kwargs={"cascade": "all", "passive_deletes": True},
     )
 
-class User(UserBaseImageless):
-    id: int
-    roles: list["UserRole"] | None = None
-    skills: list["UserSkill"] | None = None
-    modules: list["ModuleShortRead"] | None = None
-
-class UserCreate(UserBaseImageless):
+class UserCreate(UserImagelessBase):
     pw:   str
     role_ids: list[int] = Field(default_factory=list)
     module_ids: list[int] = Field(default_factory=list)
     skill_ids: list[int] = Field(default_factory=list)
 
-class UserRead(User):
-    pass
+class UserRead(UserImagelessBase):
+    id: int
+    roles: list["UserRole"] | None = None
+    skills: list["UserSkill"] | None = None
+    modules: list["ModuleShortRead"] | None = None
 
 class UserUpdate(SQLModel):
     username:    str           = Field(default=None)
@@ -113,7 +113,7 @@ class UserUpdate(SQLModel):
     title:       str           = Field(default=None)
     usertype:    UserType      = Field(default=UserType.regular)
     is_active:   bool          = Field(default=None)
-    created_at:  datetime      = Field(default_factory=lambda: datetime.now(timezone.utc))
+
     roles: list[int] | None = Field(default=None)
     skills: list[int] | None = Field(default=None)
     modules: list[int] | None = Field(default=None)
@@ -131,7 +131,7 @@ class UserRoleBase(SQLModel):
 class UserRole(UserRoleBase, table=True):
     id: int | None = Field(default=None, primary_key=True)
 
-    users: list["UserInDB"] = Relationship(
+    users: list["User"] = Relationship(
         back_populates="roles",
         link_model=UserRoleLink,
         sa_relationship_kwargs={"cascade": "all", "passive_deletes": True}
@@ -142,7 +142,7 @@ class UserRoleCreate(UserRoleBase):
 
 class UserRoleRead(UserRoleBase):
     id: int
-    users: list["UserBaseImageless"] | None = None
+    users: list["UserShortBase"] | None = None
 
 class UserRoleUpdate(UserRoleBase):
     rolename: str | None= Field(default=None)
@@ -158,13 +158,12 @@ class UserRoleUpdate(UserRoleBase):
 class UserSkillBase(SQLModel):
     skillname: str = Field(index=True, unique=True, nullable=False)
     skill_level: int = Field(default=0)
-    extra_attribute: str | None = Field(default=None)
     notes: str | None = Field(default=None, max_length=255)
 
 class UserSkill(UserSkillBase, table=True):
     id: int | None = Field(default=None, primary_key=True)
 
-    users: list["UserInDB"] = Relationship(
+    users: list["User"] = Relationship(
         back_populates="skills",
         link_model=UserSkillLink,
         sa_relationship_kwargs={"cascade": "all", "passive_deletes": True}
@@ -175,12 +174,11 @@ class UserSkillCreate(UserSkillBase):
 
 class UserSkillRead(UserSkillBase):
     id: int
-    users: list["UserBaseImageless"] | None = None
+    users: list["UserShortBase"] | None = None
 
 class UserSkillUpdate(UserSkillBase):
     skillname: str | None = Field(default=None)
     skill_level: int | None = Field(default=None)
-    extra_attribute: str | None = Field(default=None)
     notes: str | None = Field(default=None, max_length=255)
     
 #endregion
@@ -195,7 +193,7 @@ class Module(ModuleBase, table=True):
     linkname: str
     image_url: str
 
-    users: list["UserInDB"] = Relationship(
+    users: list["User"] = Relationship(
         back_populates="modules",
         link_model=UserModuleLink,
         sa_relationship_kwargs={"cascade": "all", "passive_deletes": True},

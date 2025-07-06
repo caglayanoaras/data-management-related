@@ -83,7 +83,7 @@ def init_db():
 
         all_modules  = session.exec(select(Module)).all()
         superadmins  = session.exec(
-            select(UserInDB).where(UserInDB.usertype == UserType.superadmin)
+            select(User).where(User.usertype == UserType.superadmin)
         ).all()
 
         for user in superadmins:
