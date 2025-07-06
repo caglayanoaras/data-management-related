@@ -151,7 +151,9 @@ def create_user(*, db: Session, user_create: UserCreate, created_by:str) -> User
     user_data = user_create.model_dump(exclude={"pw", "role_ids", "module_ids", "skill_ids"})
     hashed_pw = get_password_hash(user_create.pw)
     db_user = User(**user_data, hashed_pw=hashed_pw, created_by=created_by, last_modified_by=created_by)
-
+    db.add(db_user)
+    db.flush()
+    
     # Super‑admin gets *all* existing modules (ignores module_ids)
     if user_create.usertype == UserType.superadmin:
         db_user.modules = db.exec(select(Module)).all()
@@ -244,11 +246,12 @@ def delete_user(*, db: Session, username: str, protect_superadmin: bool = True) 
     Set `protect_superadmin=False` if you truly want the ability to remove
     a super‑admin account.
     """
-    user = read_user(db, username)
-
+    statement = select(User).where(User.username == username)
+    user=db.exec(statement).first()
+    
     if not user:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
-                            detail=f"UserRead with username={user} not found")
+                            detail=f"User with username={user} not found")
 
     if protect_superadmin and user.usertype == UserType.superadmin:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
@@ -256,6 +259,7 @@ def delete_user(*, db: Session, username: str, protect_superadmin: bool = True) 
 
     db.delete(user)      # ON DELETE CASCADE covers link tables
     db.commit()
+    return True
 # endregion
 
 # region module crud

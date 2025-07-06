@@ -151,3 +151,134 @@
     </div>
   </div>
 </div>
+
+<!-- Add/Edit User Modal -->
+<div class="modal fade" id="users-userModal" tabindex="-1">
+  <div class="modal-dialog modal-xl">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="users-userModalTitle"></h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <form id="users-userForm">
+          <div class="row">
+            <div class="col-md-6">
+              <div class="mb-3">
+                <label for="users-username" class="form-label">Username <span class="text-danger">*</span></label>
+                <input type="text" class="form-control" id="users-username" required>
+              </div>
+            </div>
+          </div>
+          
+          <div class="row">
+            <div class="col-md-6">
+              <div class="mb-3">
+                <label for="users-name" class="form-label">First Name <span class="text-danger">*</span></label>
+                <input type="text" class="form-control" id="users-name" required>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="mb-3">
+                <label for="users-surname" class="form-label">Last Name <span class="text-danger">*</span></label>
+                <input type="text" class="form-control" id="users-surname" required>
+              </div>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-md-6">
+              <div class="mb-3">
+                <label for="users-title" class="form-label">Title <span class="text-danger">*</span></label>
+                <input type="text" class="form-control" id="users-title" required>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="mb-3">
+                <label for="users-email" class="form-label">Email <span class="text-danger">*</span></label>
+                <input type="email" class="form-control" id="users-email" required>
+              </div>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-md-6">
+              <div class="mb-3">
+                <label for="users-usertype" class="form-label">User Type</label>
+                <select class="form-select" id="users-usertype">
+                  <option value="regular">Regular</option>
+                  <option value="mp_admin">M&P Admin</option>
+                  <option value="superadmin">Super Admin</option>
+                </select>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="mb-3">
+                <div class="form-check form-switch mt-4">
+                  <input class="form-check-input" type="checkbox" id="users-isActive" checked>
+                  <label class="form-check-label" for="users-isActive">
+                    <i class="fas fa-user-check text-success me-1"></i>
+                    Active User
+                  </label>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-12">
+              <div class="mb-3">
+                <label for="users-password" class="form-label">Password <span class="text-danger">*</span></label>
+                <input type="password" class="form-control" id="users-password" required>
+                <div class="form-text">Leave empty when editing to keep current password</div>
+              </div>
+            </div>
+          </div>
+
+          <hr class="my-4">
+          
+          <!-- Tom Select Sections -->
+          <div class="row">
+            <div class="col-md-4">
+              <div class="mb-3">
+                <label for="users-roles" class="form-label">
+                  <i class="fas fa-user-shield text-success me-1"></i>
+                  Roles
+                </label>
+                <select id="users-roles" multiple placeholder="Select roles...">
+                </select>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="mb-3">
+                <label for="users-skills" class="form-label">
+                  <i class="fas fa-hammer text-warning me-1"></i>
+                  Skills
+                </label>
+                <select id="users-skills" multiple placeholder="Select skills...">
+                </select>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="mb-3">
+                <label for="users-modules" class="form-label">
+                  <i class="fas fa-gears text-secondary me-1"></i>
+                  Modules
+                </label>
+                <select id="users-modules" multiple placeholder="Select modules...">
+                </select>
+              </div>
+            </div>
+          </div>
+
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-primary" id="users-saveUserBtn">
+          <i class="fas fa-save me-1"></i>Save Changes
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

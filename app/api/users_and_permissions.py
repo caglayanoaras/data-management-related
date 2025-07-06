@@ -233,12 +233,12 @@ def update_existing_user(
 @users_and_permissions_router.delete("/users/{username}", name='delete_user_by_username', status_code=status.HTTP_204_NO_CONTENT)
 def delete_user_by_username(current_user: UserDep, username: str, db: Session = Depends(get_session)):
     """
-    Delete a user role by its ID.
+    Delete a user by its username.
     """
     if not delete_user(db=db, username=username):
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="UserRead not found"
+            detail="Failed to delete user."
         )
     return {"ok": True}
 # endregion
