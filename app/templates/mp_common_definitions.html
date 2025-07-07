@@ -30,14 +30,14 @@
               <span>Laboratories</span>
             </button>
 
-            <button type="button" class="list-group-item list-group-item-action d-flex align-items-center py-3 sidebar-btn" data-content="warehouses">                  
-              <i class="fas fa-warehouse me-3 text-warning"></i>
-              <span>Warehouses</span>
-            </button>
-
             <button type="button" class="list-group-item list-group-item-action d-flex align-items-center py-3 sidebar-btn" data-content="locations">                 
               <i class="fas fa-location-dot me-3 text-warning"></i>
               <span>Locations</span>
+            </button>
+
+            <button type="button" class="list-group-item list-group-item-action d-flex align-items-center py-3 sidebar-btn" data-content="warehouses">                  
+              <i class="fas fa-warehouse me-3 text-warning"></i>
+              <span>Warehouses</span>
             </button>
 
             <button type="button" class="list-group-item list-group-item-action d-flex align-items-center py-3 sidebar-btn" data-content="material-types">               
@@ -77,14 +77,14 @@
               <span>Laboratories</span>
             </button>
 
-            <button type="button" class="list-group-item list-group-item-action d-flex align-items-center py-3 sidebar-btn" data-content="warehouses">                  
-              <i class="fas fa-warehouse me-3 text-warning"></i>
-              <span>Warehouses</span>
-            </button>
-
             <button type="button" class="list-group-item list-group-item-action d-flex align-items-center py-3 sidebar-btn" data-content="locations">                 
               <i class="fas fa-location-dot me-3 text-warning"></i>
               <span>Locations</span>
+            </button>
+            
+            <button type="button" class="list-group-item list-group-item-action d-flex align-items-center py-3 sidebar-btn" data-content="warehouses">                  
+              <i class="fas fa-warehouse me-3 text-warning"></i>
+              <span>Warehouses</span>
             </button>
 
             <button type="button" class="list-group-item list-group-item-action d-flex align-items-center py-3 sidebar-btn" data-content="material-types">               
@@ -109,85 +109,126 @@
   <!-- Main content area -->
   <div class="col-lg-10 col-md-12">
     <div class="p-4">
-    <!-- Welcome message -->
-    <div id="welcome-content" class="text-center py-5">
-      <i class="fas fa-building-user fa-3x text-muted mb-3"></i>
-      <h4 class="text-muted">Welcome to M&P Common Definitions</h4>
-      <p class="text-muted">Select an option from the sidebar to get started</p>
-    </div>
+      <div id="welcome-content" class="text-center py-5">
+        <i class="fas fa-building-user fa-3x text-muted mb-3"></i>
+        <h4 class="text-muted">Welcome to M&P Common Definitions</h4>
+        <p class="text-muted">Select an option from the sidebar to get started</p>
+      </div>
 
-    <!-- Users content -->
-    <div id="users-content" class="content-section fade-in" style="display: none;">
+      <div id="divisions-content" class="content-section fade-in" style="display: none;">
         <div class="d-flex justify-content-between align-items-center mb-4">
-        <h3 class="mb-0">
-            <i class="fas fa-users text-primary me-2"></i>
-            Users Management
-        </h3>
-        <button class="btn btn-primary" id="users-addUserBtn">
+          <h3 class="mb-0">
+            <i class="fas fa-building text-danger me-2"></i>
+            Divisions Management
+          </h3>
+          <button class="btn btn-danger" id="divisions-addBtn">
             <i class="fas fa-plus me-2"></i>
-            Add User
-        </button> 
+            Add Division
+          </button>
         </div>
-
-        <!-- Data Grid container -->
-        <div class="container-flex">            
-        <div id="users-grid" style="height: 600px"></div> 
+        <div class="container-flex">
+          <div id="divisions-grid" style="height: 600px"></div>
         </div>
-    </div>
+      </div>
 
-    <!-- User Roles content -->
-    <div id="user-roles-content" class="content-section fade-in" style="display: none;">
+      <div id="laboratories-content" class="content-section fade-in" style="display: none;">
         <div class="d-flex justify-content-between align-items-center mb-4">
-        <h3 class="mb-0">
-            <i class="fas fa-user-shield text-success me-2"></i>
-            User Roles Management
-        </h3>
-        <button class="btn btn-success" id="user-roles-addRoleBtn">
+          <h3 class="mb-0">
+            <i class="fas fa-flask-vial text-success me-2"></i>
+            Laboratories Management
+          </h3>
+          <button class="btn btn-success" id="laboratories-addBtn">
             <i class="fas fa-plus me-2"></i>
-            Add Role
-        </button>          
+            Add Laboratory
+          </button>
         </div>
+        <div class="container-flex">
+          <div id="laboratories-grid" style="height: 600px"></div>
+        </div>
+      </div>
 
-        <!-- Data Grid container -->
-        <div class="container-flex">            
-        <div id="user-roles-grid" style="height: 600px"></div> 
-        </div>
-    </div>
-    
-    <!-- User Skills content -->
-    <div id="user-skills-content" class="content-section fade-in" style="display: none;">
+      <div id="locations-content" class="content-section fade-in" style="display: none;">
         <div class="d-flex justify-content-between align-items-center mb-4">
-        <h3 class="mb-0">
-            <i class="fas fa-hammer text-warning me-2"></i>
-            User Skills Management
-        </h3>
-        <button class="btn btn-warning" id="user-skills-addSkillBtn">
+          <h3 class="mb-0">
+            <i class="fas fa-location-dot text-warning me-2"></i>
+            Locations Management
+          </h3>
+          <button class="btn btn-warning" id="locations-addBtn">
             <i class="fas fa-plus me-2"></i>
-            Add Skill
-        </button> 
+            Add Location
+          </button>
         </div>
+        <div class="container-flex">
+          <div id="locations-grid" style="height: 600px"></div>
+        </div>
+      </div>
+        
+      <div id="warehouses-content" class="content-section fade-in" style="display: none;">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+          <h3 class="mb-0">
+            <i class="fas fa-warehouse text-primary me-2"></i>
+            Warehouses Management
+          </h3>
+          <button class="btn btn-primary" id="warehouses-addBtn">
+            <i class="fas fa-plus me-2"></i>
+            Add Warehouse
+          </button>
+        </div>
+        <div class="container-flex">
+          <div id="warehouses-grid" style="height: 600px"></div>
+        </div>
+      </div>
+        
+      <div id="material-types-content" class="content-section fade-in" style="display: none;">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+          <h3 class="mb-0">
+            <i class="fas fa-recycle text-primary me-2"></i>
+            Material Types Management
+          </h3>
+          <button class="btn btn-primary" id="material-types-addBtn">
+            <i class="fas fa-plus me-2"></i>
+            Add Material Type
+          </button>
+        </div>
+        <div class="container-flex">
+          <div id="material-types-grid" style="height: 600px"></div>
+        </div>
+      </div>
 
-        <!-- Data Grid container -->
-        <div class="container-flex">            
-        <div id="user-skills-grid" style="height: 600px"></div> 
+      <div id="materials-content" class="content-section fade-in" style="display: none;">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+          <h3 class="mb-0">
+            <i class="fas fa-atom text-primary me-2"></i>
+            Materials Management
+          </h3>
+          <button class="btn btn-primary" id="materials-addBtn">
+            <i class="fas fa-plus me-2"></i>
+            Add Material
+          </button>
         </div>
-    </div>
+        <div class="container-flex">
+          <div id="materials-grid" style="height: 600px"></div>
+        </div>
+      </div>
 
-    <!-- Modules content -->
-    <div id="modules-content" class="content-section fade-in" style="display: none;">
-        <div class="d-flex mb-4">
-        <h3 class="mb-0">
-            <i class="fas fa-gears text-secondary me-2"></i>
-            Existing Modules
-        </h3>
+      <div id="material-instances-content" class="content-section fade-in" style="display: none;">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+          <h3 class="mb-0">
+            <i class="fas fa-microscope text-primary me-2"></i>
+            Material Instances Management
+          </h3>
+          <button class="btn btn-primary" id="material-instances-addBtn">
+            <i class="fas fa-plus me-2"></i>
+            Add Material Instance
+          </button>
         </div>
-        <!-- Data Grid container -->
-        <div class="container-flex">            
-        <div id="user-modules-grid" style="height: 600px"></div> 
+        <div class="container-flex">
+          <div id="material-instances-grid" style="height: 600px"></div>
         </div>
-    </div>
-
+      </div>
     </div>
   </div>
+
+  
 </div>
 {% endblock %}
