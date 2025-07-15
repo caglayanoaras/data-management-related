@@ -148,33 +148,33 @@ def create_user(*, db: Session, user_create: UserCreate, created_by:str) -> User
         raise HTTPException(status_code=400, detail="Username or email already exists")
 
     # Create user object
-    user_data = user_create.model_dump(exclude={"pw", "role_ids", "module_ids", "skill_ids"})
+    user_data = user_create.model_dump(exclude={"pw", "roles", "modules", "skills"})
     hashed_pw = get_password_hash(user_create.pw)
     db_user = User(**user_data, hashed_pw=hashed_pw, created_by=created_by, last_modified_by=created_by)
     db.add(db_user)
     db.flush()
     
-    # Super‑admin gets *all* existing modules (ignores module_ids)
+    # Super‑admin gets *all* existing modules (ignores modules)
     if user_create.usertype == UserType.superadmin:
         db_user.modules = db.exec(select(Module)).all()
-    elif user_create.module_ids:
-        modules = db.exec(select(Module).where(Module.id.in_(user_create.module_ids))).all()
-        if len(modules) != len(set(user_create.module_ids)):
-            missing = set(user_create.module_ids) - {m.id for m in modules}
+    elif user_create.modules:
+        modules = db.exec(select(Module).where(Module.id.in_(user_create.modules))).all()
+        if len(modules) != len(set(user_create.modules)):
+            missing = set(user_create.modules) - {m.id for m in modules}
             raise HTTPException(status_code=404, detail=f"Modules not found: {missing}")
         db_user.modules = modules
 
-    if user_create.role_ids:
-        roles = db.exec(select(UserRole).where(UserRole.id.in_(user_create.role_ids))).all()
-        if len(roles) != len(set(user_create.role_ids)):
-            missing = set(user_create.role_ids) - {r.id for r in roles}
+    if user_create.roles:
+        roles = db.exec(select(UserRole).where(UserRole.id.in_(user_create.roles))).all()
+        if len(roles) != len(set(user_create.roles)):
+            missing = set(user_create.roles) - {r.id for r in roles}
             raise HTTPException(status_code=404, detail=f"Roles not found: {missing}")
         db_user.roles = roles
 
-    if user_create.skill_ids:
-        skills = db.exec(select(UserSkill).where(UserSkill.id.in_(user_create.skill_ids))).all()
-        if len(skills) != len(set(user_create.skill_ids)):
-            missing = set(user_create.skill_ids) - {r.id for r in skills}
+    if user_create.skills:
+        skills = db.exec(select(UserSkill).where(UserSkill.id.in_(user_create.skills))).all()
+        if len(skills) != len(set(user_create.skills)):
+            missing = set(user_create.skills) - {r.id for r in skills}
             raise HTTPException(status_code=404, detail=f"Skills not found: {missing}")
         db_user.skills = skills
 
@@ -208,18 +208,18 @@ def update_user(*, db: Session, db_user: User, user_update: UserUpdate, updated_
     new_usertype = data.get("usertype", db_user.usertype)
 
     if user_update.roles is not None:   # None ➜ leave unchanged
-        role_ids = [r.id if isinstance(r, UserRole) else r for r in user_update.roles]
-        roles = db.exec(select(UserRole).where(UserRole.id.in_(role_ids))).all()
-        if len(roles) != len(set(role_ids)):
-            missing = set(role_ids) - {r.id for r in roles}
+        roles = [r.id if isinstance(r, UserRole) else r for r in user_update.roles]
+        roles = db.exec(select(UserRole).where(UserRole.id.in_(roles))).all()
+        if len(roles) != len(set(roles)):
+            missing = set(roles) - {r.id for r in roles}
             raise HTTPException(status_code=404, detail=f"Roles not found: {missing}")
         db_user.roles = roles
 
     if user_update.skills is not None:   # None ➜ leave unchanged
-        skill_ids = [r.id if isinstance(r, UserSkill) else r for r in user_update.skills]
-        skills = db.exec(select(UserSkill).where(UserSkill.id.in_(skill_ids))).all()
-        if len(skills) != len(set(skill_ids)):
-            missing = set(skill_ids) - {r.id for r in skills}
+        skills = [r.id if isinstance(r, UserSkill) else r for r in user_update.skills]
+        skills = db.exec(select(UserSkill).where(UserSkill.id.in_(skills))).all()
+        if len(skills) != len(set(skills)):
+            missing = set(skills) - {r.id for r in skills}
             raise HTTPException(status_code=404, detail=f"Skills not found: {missing}")
         db_user.skills = skills
 
@@ -227,10 +227,10 @@ def update_user(*, db: Session, db_user: User, user_update: UserUpdate, updated_
         # Super‑admin always owns every module, ignoring payload
         db_user.modules = db.exec(select(Module)).all()
     elif user_update.modules is not None:                # None ➜ leave unchanged
-        module_ids = [m.id if isinstance(m, Module) else m for m in user_update.modules]
-        modules = db.exec(select(Module).where(Module.id.in_(module_ids))).all()
-        if len(modules) != len(set(module_ids)):
-            missing = set(module_ids) - {m.id for m in modules}
+        modules = [m.id if isinstance(m, Module) else m for m in user_update.modules]
+        modules = db.exec(select(Module).where(Module.id.in_(modules))).all()
+        if len(modules) != len(set(modules)):
+            missing = set(modules) - {m.id for m in modules}
             raise HTTPException(status_code=404, detail=f"Modules not found: {missing}")
         db_user.modules = modules
 

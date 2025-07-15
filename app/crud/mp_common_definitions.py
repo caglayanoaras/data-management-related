@@ -89,22 +89,22 @@ def create_warehouse(*, db: Session, warehouse_create: WarehouseCreate) -> Wareh
             detail=f"Warehouse with code '{warehouse_create.code}' already exists",
         )
     
-    warehouse_data = warehouse_create.model_dump(exclude={"location_codes", "division_codes"})
+    warehouse_data = warehouse_create.model_dump(exclude={"locations", "divisions"})
     db_warehouse = Warehouse.model_validate(warehouse_data)
 
     # Link Locations
-    if warehouse_create.location_codes:
-        locations = db.exec(select(Location).where(Location.code.in_(warehouse_create.location_codes))).all()
-        if len(locations) != len(set(warehouse_create.location_codes)):
-            missing = set(warehouse_create.location_codes) - {loc.code for loc in locations}
+    if warehouse_create.locations:
+        locations = db.exec(select(Location).where(Location.code.in_(warehouse_create.locations))).all()
+        if len(locations) != len(set(warehouse_create.locations)):
+            missing = set(warehouse_create.locations) - {loc.code for loc in locations}
             raise HTTPException(status_code=404, detail=f"Locations not found: {missing}")
         db_warehouse.locations = locations
 
     # Link Divisions
-    if warehouse_create.division_codes:
-        divisions = db.exec(select(Division).where(Division.code.in_(warehouse_create.division_codes))).all()
-        if len(divisions) != len(set(warehouse_create.division_codes)):
-            missing = set(warehouse_create.division_codes) - {div.code for div in divisions}
+    if warehouse_create.divisions:
+        divisions = db.exec(select(Division).where(Division.code.in_(warehouse_create.divisions))).all()
+        if len(divisions) != len(set(warehouse_create.divisions)):
+            missing = set(warehouse_create.divisions) - {div.code for div in divisions}
             raise HTTPException(status_code=404, detail=f"Divisions not found: {missing}")
         db_warehouse.divisions = divisions
 
@@ -120,21 +120,21 @@ def update_warehouse(*, db: Session, db_warehouse: Warehouse, input_warehouse: W
             raise HTTPException(status_code=400, detail=f"Warehouse code '{input_warehouse.code}' already exists")
     
     # Update scalar fields
-    warehouse_data = input_warehouse.model_dump(exclude_unset=True, exclude={"location_codes", "division_codes"})
+    warehouse_data = input_warehouse.model_dump(exclude_unset=True, exclude={"locations", "divisions"})
     db_warehouse.sqlmodel_update(warehouse_data)
 
     # Update relationships if provided (None means leave unchanged)
-    if input_warehouse.location_codes is not None:
-        locations = db.exec(select(Location).where(Location.code.in_(input_warehouse.location_codes))).all()
-        if len(locations) != len(set(input_warehouse.location_codes)):
-            missing = set(input_warehouse.location_codes) - {loc.code for loc in locations}
+    if input_warehouse.locations is not None:
+        locations = db.exec(select(Location).where(Location.code.in_(input_warehouse.locations))).all()
+        if len(locations) != len(set(input_warehouse.locations)):
+            missing = set(input_warehouse.locations) - {loc.code for loc in locations}
             raise HTTPException(status_code=404, detail=f"Locations not found: {missing}")
         db_warehouse.locations = locations
 
-    if input_warehouse.division_codes is not None:
-        divisions = db.exec(select(Division).where(Division.code.in_(input_warehouse.division_codes))).all()
-        if len(divisions) != len(set(input_warehouse.division_codes)):
-            missing = set(input_warehouse.division_codes) - {div.code for div in divisions}
+    if input_warehouse.divisions is not None:
+        divisions = db.exec(select(Division).where(Division.code.in_(input_warehouse.divisions))).all()
+        if len(divisions) != len(set(input_warehouse.divisions)):
+            missing = set(input_warehouse.divisions) - {div.code for div in divisions}
             raise HTTPException(status_code=404, detail=f"Divisions not found: {missing}")
         db_warehouse.divisions = divisions
     
@@ -176,14 +176,14 @@ def create_laboratory(*, db: Session, laboratory_create: LaboratoryCreate) -> La
             detail=f"Laboratory with code '{laboratory_create.code}' already exists",
         )
     
-    laboratory_data = laboratory_create.model_dump(exclude={"division_codes"})
+    laboratory_data = laboratory_create.model_dump(exclude={"divisions"})
     db_laboratory = Laboratory.model_validate(laboratory_data)
 
     # Link Divisions
-    if laboratory_create.division_codes:
-        divisions = db.exec(select(Division).where(Division.code.in_(laboratory_create.division_codes))).all()
-        if len(divisions) != len(set(laboratory_create.division_codes)):
-            missing = set(laboratory_create.division_codes) - {div.code for div in divisions}
+    if laboratory_create.divisions:
+        divisions = db.exec(select(Division).where(Division.code.in_(laboratory_create.divisions))).all()
+        if len(divisions) != len(set(laboratory_create.divisions)):
+            missing = set(laboratory_create.divisions) - {div.code for div in divisions}
             raise HTTPException(status_code=404, detail=f"Divisions not found: {missing}")
         db_laboratory.divisions = divisions
 
@@ -198,13 +198,13 @@ def update_laboratory(*, db: Session, db_laboratory: Laboratory, input_laborator
         if db.exec(select(Laboratory).where(Laboratory.code == input_laboratory.code)).first():
             raise HTTPException(status_code=400, detail=f"Laboratory code '{input_laboratory.code}' already exists")
 
-    laboratory_data = input_laboratory.model_dump(exclude_unset=True, exclude={"division_codes"})
+    laboratory_data = input_laboratory.model_dump(exclude_unset=True, exclude={"divisions"})
     db_laboratory.sqlmodel_update(laboratory_data)
 
-    if input_laboratory.division_codes is not None:
-        divisions = db.exec(select(Division).where(Division.code.in_(input_laboratory.division_codes))).all()
-        if len(divisions) != len(set(input_laboratory.division_codes)):
-            missing = set(input_laboratory.division_codes) - {div.code for div in divisions}
+    if input_laboratory.divisions is not None:
+        divisions = db.exec(select(Division).where(Division.code.in_(input_laboratory.divisions))).all()
+        if len(divisions) != len(set(input_laboratory.divisions)):
+            missing = set(input_laboratory.divisions) - {div.code for div in divisions}
             raise HTTPException(status_code=404, detail=f"Divisions not found: {missing}")
         db_laboratory.divisions = divisions
         
@@ -254,25 +254,25 @@ def create_division(*, db: Session, division_create: DivisionCreate) -> Division
             detail=f"Division with code '{division_create.code}' already exists",
         )
     
-    division_data = division_create.model_dump(exclude={"laboratory_codes", "warehouse_codes", "employee_usernames"})
+    division_data = division_create.model_dump(exclude={"laboratories", "warehouses", "users"})
     db_division = Division.model_validate(division_data)
 
     # Link relationships
-    if division_create.laboratory_codes:
-        labs = db.exec(select(Laboratory).where(Laboratory.code.in_(division_create.laboratory_codes))).all()
-        if len(labs) != len(set(division_create.laboratory_codes)):
+    if division_create.laboratories:
+        labs = db.exec(select(Laboratory).where(Laboratory.code.in_(division_create.laboratories))).all()
+        if len(labs) != len(set(division_create.laboratories)):
             raise HTTPException(status_code=404, detail="One or more laboratories not found")
         db_division.laboratories = labs
     
-    if division_create.warehouse_codes:
-        warehouses = db.exec(select(Warehouse).where(Warehouse.code.in_(division_create.warehouse_codes))).all()
-        if len(warehouses) != len(set(division_create.warehouse_codes)):
+    if division_create.warehouses:
+        warehouses = db.exec(select(Warehouse).where(Warehouse.code.in_(division_create.warehouses))).all()
+        if len(warehouses) != len(set(division_create.warehouses)):
             raise HTTPException(status_code=404, detail="One or more warehouses not found")
         db_division.warehouses = warehouses
 
-    if division_create.employee_usernames:
-        employees = db.exec(select(User).where(User.username.in_(division_create.employee_usernames))).all()
-        if len(employees) != len(set(division_create.employee_usernames)):
+    if division_create.users:
+        employees = db.exec(select(User).where(User.username.in_(division_create.users))).all()
+        if len(employees) != len(set(division_create.users)):
             raise HTTPException(status_code=404, detail="One or more employees not found")
         db_division.employees = employees
     
@@ -287,25 +287,25 @@ def update_division(*, db: Session, db_division: Division, input_division: Divis
         if db.exec(select(Division).where(Division.code == input_division.code)).first():
             raise HTTPException(status_code=400, detail=f"Division code '{input_division.code}' already exists")
 
-    division_data = input_division.model_dump(exclude_unset=True, exclude={"laboratory_codes", "warehouse_codes", "employee_usernames"})
+    division_data = input_division.model_dump(exclude_unset=True, exclude={"laboratories", "warehouses", "users"})
     db_division.sqlmodel_update(division_data)
 
     # Update relationships if provided
-    if input_division.laboratory_codes is not None:
-        labs = db.exec(select(Laboratory).where(Laboratory.code.in_(input_division.laboratory_codes))).all()
-        if len(labs) != len(set(input_division.laboratory_codes)):
+    if input_division.laboratories is not None:
+        labs = db.exec(select(Laboratory).where(Laboratory.code.in_(input_division.laboratories))).all()
+        if len(labs) != len(set(input_division.laboratories)):
             raise HTTPException(status_code=404, detail="One or more laboratories not found")
         db_division.laboratories = labs
 
-    if input_division.warehouse_codes is not None:
-        warehouses = db.exec(select(Warehouse).where(Warehouse.code.in_(input_division.warehouse_codes))).all()
-        if len(warehouses) != len(set(input_division.warehouse_codes)):
+    if input_division.warehouses is not None:
+        warehouses = db.exec(select(Warehouse).where(Warehouse.code.in_(input_division.warehouses))).all()
+        if len(warehouses) != len(set(input_division.warehouses)):
             raise HTTPException(status_code=404, detail="One or more warehouses not found")
         db_division.warehouses = warehouses
 
-    if input_division.employee_usernames is not None:
-        employees = db.exec(select(User).where(User.username.in_(input_division.employee_usernames))).all()
-        if len(employees) != len(set(input_division.employee_usernames)):
+    if input_division.users is not None:
+        employees = db.exec(select(User).where(User.username.in_(input_division.users))).all()
+        if len(employees) != len(set(input_division.users)):
             raise HTTPException(status_code=404, detail="One or more employees not found")
         db_division.employees = employees
 

@@ -3,16 +3,26 @@
 {% block title %}Users & Permissions{% endblock %}
 
 {% block styles %}
-
+  <!-- Styles for users and permissions. Goes to the head of the html -->
 {% endblock %}
 
 {% block scripts %}
+<!-- Scripts for users and permissions. Goes to the bottom of the body of the html -->
   <script src="{{ url_for('static', path='/js/ag-grid-community.min.js') }}"></script>
-  
+  <script type="module" src="{{ url_for('static', path='js/apps/users-and-permissions-app.js') }}"></script>
 {% endblock %}
 
 {% block content %}
 {% include 'snippets/user_and_permissions_modals.html' %}
+
+<!-- jinja templates does not process js if you have type=module. Thus urls are provided in html template. -->
+<div id="user-skills-urlparams"
+     data-url-get-all="{{ url_for('get_all_user_skills') }}"
+     data-url-create="{{ url_for('create_new_user_skill') }}"
+     data-url-update="{{ url_for('update_existing_user_skill', skill_id='PLACEHOLDER') }}"
+     data-url-delete="{{ url_for('delete_user_skill_by_id', skill_id='PLACEHOLDER') }}">
+</div>
+
 <div class="row g-0">
   <!-- Sidebar -->
   <div class="col-lg-2 col-md-3">
@@ -180,7 +190,7 @@
   </div>
 </div>
 
-<script>
+<!-- <script>
   class UserRoleManager {
       constructor() {
           this.gridDiv = document.querySelector("#user-roles-grid");
@@ -1819,5 +1829,5 @@
   document.addEventListener('DOMContentLoaded', function() {
       window.usersPermissionsApp = new UsersPermissionsApp();
   });
-</script>
+</script> -->
 {% endblock %}

@@ -88,7 +88,7 @@ class DivisionWarehouseLink(SQLModel, table=True):
         )
     )
 
-class DivisionEmployeeLink(SQLModel, table=True):
+class DivisionUserLink(SQLModel, table=True):
     division_id: int = Field(
         sa_column=Column(
             ForeignKey("division.id", ondelete="CASCADE"),
@@ -150,23 +150,26 @@ class User(UserBase, table=True):
     )
 
     divisions: list["Division"] = Relationship(
-        back_populates="employees",
-        link_model=DivisionEmployeeLink,
+        back_populates="users",
+        link_model=DivisionUserLink,
         sa_relationship_kwargs={"cascade": "all", "passive_deletes": True},
     )
 
 class UserCreate(UserImagelessBase):
     pw:   str
-    role_ids: list[int] = Field(default_factory=list)
-    module_ids: list[int] = Field(default_factory=list)
-    skill_ids: list[int] = Field(default_factory=list)
+    roles: list[int] = Field(default_factory=list, description="List of role IDs to assign to the user")
+    modules: list[int] = Field(default_factory=list, description="List of module IDs to assign to the user")
+    skills: list[int] = Field(default_factory=list, description="List of skill IDs to assign to the user")
 
 class UserRead(UserImagelessBase):
     id: int
-    roles: list["UserRoleBase"] | None = None
-    skills: list["UserSkillBase"] | None = None
+    roles: list["UserRoleShortRead"] | None = None
+    skills: list["UserSkillShortRead"] | None = None
     modules: list["ModuleShortRead"] | None = None
-    divisions: list["DivisionBase"] | None = None
+    divisions: list["DivisionShortRead"] | None = None
+
+class UserShortRead(UserShortBase):
+    id: int
 
 class UserUpdate(SQLModel):
     username:    str           = Field(default=None)
@@ -177,9 +180,10 @@ class UserUpdate(SQLModel):
     usertype:    UserType      = Field(default=UserType.regular)
     is_active:   bool          = Field(default=None)
 
-    roles: list[int] | None = Field(default=None)
-    skills: list[int] | None = Field(default=None)
-    modules: list[int] | None = Field(default=None)
+    roles: list[int] | None = Field(default=None, description="List of role IDs to assign to the user")
+    modules: list[int] | None = Field(default=None, description="List of module IDs to assign to the user")
+    skills: list[int] | None = Field(default=None, description="List of skill IDs to assign to the user")
+    
 #endregion
 
 # region UserRole models
@@ -206,6 +210,9 @@ class UserRoleCreate(UserRoleBase):
 class UserRoleRead(UserRoleBase):
     id: int
     users: list["UserShortBase"] | None = None
+
+class UserRoleShortRead(UserRoleBase):
+    id: int
 
 class UserRoleUpdate(UserRoleBase):
     rolename: str | None= Field(default=None)
@@ -238,6 +245,9 @@ class UserSkillCreate(UserSkillBase):
 class UserSkillRead(UserSkillBase):
     id: int
     users: list["UserShortBase"] | None = None
+
+class UserSkillShortRead(UserSkillBase):
+    id: int
 
 class UserSkillUpdate(UserSkillBase):
     skillname: str | None = Field(default=None)
@@ -290,29 +300,32 @@ class Division(DivisionBase, table=True):
         sa_relationship_kwargs={"cascade": "all", "passive_deletes": True}
     )
 
-    employees: list["User"] = Relationship(
+    users: list["User"] = Relationship(
         back_populates="divisions",
-        link_model=DivisionEmployeeLink,
+        link_model=DivisionUserLink,
         sa_relationship_kwargs={"cascade": "all", "passive_deletes": True}
     )
 class DivisionCreate(DivisionBase):
-    laboratory_codes: list[str] = Field(default_factory=list)
-    warehouse_codes: list[str] = Field(default_factory=list)
-    employee_usernames: list[str] = Field(default_factory=list)
+    laboratories: list[str] = Field(default_factory=list, description="List of laboratory codes to assign to the division")
+    warehouses: list[str] = Field(default_factory=list, description="List of warehouse codes to assign to the division")
+    users: list[str] = Field(default_factory=list, description="List of employee usernames to assign to the division")
 
 class DivisionRead(DivisionBase):
     id: int
-    laboratories: list["Laboratory"] | None = None
-    warehouses: list["Warehouse"] | None = None
-    employees: list["UserShortBase"] | None = None
+    laboratories: list["LaboratoryShortRead"] | None = None
+    warehouses: list["WarehouseShortRead"] | None = None
+    users: list["UserShortRead"] | None = None
+
+class DivisionShortRead(DivisionBase):
+    id: int
 
 class DivisionUpdate(DivisionBase):
     code: str | None = Field(default=None)
     name: str | None = Field(default=None)
     description: str | None = Field(default=None, max_length=255)
-    laboratory_codes: list[str] | None = Field(default=None)
-    warehouse_codes: list[str] | None = Field(default=None)
-    employee_usernames: list[str] | None = Field(default=None)
+    laboratories: list[str] | None = Field(default=None, description="List of laboratory codes to assign to the division")
+    warehouses: list[str] | None = Field(default=None, description="List of warehouse codes to assign to the division")
+    users: list[str] | None = Field(default=None, description="List of employee usernames to assign to the division")
 
 # endregion
 
@@ -338,6 +351,9 @@ class LocationCreate(LocationBase):
 class LocationRead(LocationBase):
     id: int
     warehouses: list["WarehouseBase"] | None = None
+
+class LocationShortRead(LocationBase):
+    id: int
 
 class LocationUpdate(LocationBase):
     code: str | None = Field(default=None)
@@ -368,20 +384,23 @@ class Warehouse(WarehouseBase, table=True):
     )
 
 class WarehouseCreate(WarehouseBase):
-    location_codes: list[str] = Field(default_factory=list)
-    division_codes: list[str] = Field(default_factory=list)
+    locations: list[str] = Field(default_factory=list, description="List of location codes to assign to the warehouse")
+    divisions: list[str] = Field(default_factory=list, description="List of division codes to assign to the warehouse")
 
 class WarehouseRead(WarehouseBase):
     id: int
-    locations: list["Location"] | None = None
-    divisions: list["Division"] | None = None
+    locations: list["LocationShortRead"] | None = None
+    divisions: list["DivisionShortRead"] | None = None
+
+class WarehouseShortRead(WarehouseBase):
+    id: int
 
 class WarehouseUpdate(WarehouseBase):
     code: str | None = Field(default=None)
     name: str | None = Field(default=None)
     description: str | None = Field(default=None, max_length=255)
-    location_codes: list[str] | None = Field(default=None)
-    division_codes: list[str] | None = Field(default=None)
+    locations: list[str] | None = Field(default=None, description="List of location codes to assign to the warehouse")
+    divisions: list[str] | None = Field(default=None, description="List of division codes to assign to the warehouse")
 
 # endregion
 
@@ -401,16 +420,19 @@ class Laboratory(LaboratoryBase, table=True):
     )
 
 class LaboratoryCreate(LaboratoryBase):
-    division_codes: list[str] = Field(default_factory=list)
+    divisions: list[str] = Field(default_factory=list, description="List of division codes to assign to the laboratory")
 
 class LaboratoryRead(LaboratoryBase):
     id: int
-    divisions: list["Division"] | None = None
+    divisions: list["DivisionShortRead"] | None = None
+
+class LaboratoryShortRead(LaboratoryBase):
+    id: int
 
 class LaboratoryUpdate(LaboratoryBase):
     code: str | None = Field(default=None)
     name: str | None = Field(default=None)
     description: str | None = Field(default=None, max_length=255)
-    division_codes: list[str] | None = Field(default=None)
+    divisions: list[str] | None = Field(default=None, description="List of division codes to assign to the laboratory")
 
 # endregion
