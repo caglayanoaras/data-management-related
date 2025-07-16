@@ -1,5 +1,7 @@
 import { BaseGridManager } from './base-grid-manager.js';
 
+const grid = document.querySelector("#user-roles-url");
+
 export class UserRoleManager extends BaseGridManager {
   constructor() {
     super("#user-roles-grid", ["id", "rolename", "can_create", "can_read", "can_update", "can_delete", "notes", "users"]);
@@ -7,15 +9,23 @@ export class UserRoleManager extends BaseGridManager {
 
   getEntityName() { return "Role"; }
 
-  getApiUrls() {
-    return {
-      getAll: "{{ url_for('get_all_user_roles') }}",
-      create: "{{ url_for('create_new_user_role') }}",
-      update: "{{ url_for('update_existing_user_role', role_id='PLACEHOLDER') }}",
-      delete: "{{ url_for('delete_user_role_by_id', role_id='PLACEHOLDER') }}"
-    };
-  }
+	getApiUrls() {
+		return {
+			getAll: grid.dataset.urlGetAll,
+			create: grid.dataset.urlCreate,
+			update: grid.dataset.urlUpdate,
+			delete: grid.dataset.urlDelete
+		};
+	}
 
+  getActionButtons() {
+    return [
+      { action: 'edit', title: 'Edit', icon: 'fas fa-edit', variant: 'primary' },
+      { action: 'delete', title: 'Delete', icon: 'fas fa-trash-alt', variant: 'danger' },
+      { action: 'show-users', title: 'Show Users', icon: 'fas fa-user', variant: 'info' }
+    ];
+  }
+  
   getFormElements() {
     return {
       addBtn: "user-roles-addRoleBtn",

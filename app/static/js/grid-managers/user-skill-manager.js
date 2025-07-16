@@ -1,6 +1,6 @@
 import { BaseGridManager } from './base-grid-manager.js';
 
-const grid = document.querySelector("#user-skills-urlparams");
+const grid = document.querySelector("#user-skills-url");
 
 export class UserSkillManager extends BaseGridManager {
 	constructor() {
@@ -18,13 +18,13 @@ export class UserSkillManager extends BaseGridManager {
 		};
 	}
 
-    getActionButtons() {
-        return [
-            { action: 'edit', title: 'Edit', icon: 'fas fa-edit', variant: 'primary' },
-            { action: 'delete', title: 'Delete', icon: 'fas fa-trash-alt', variant: 'danger' },
-            { action: 'show-users', title: 'Show Users', icon: 'fas fa-user', variant: 'info' }
-        ];
-    }
+  getActionButtons() {
+    return [
+      { action: 'edit', title: 'Edit', icon: 'fas fa-edit', variant: 'primary' },
+      { action: 'delete', title: 'Delete', icon: 'fas fa-trash-alt', variant: 'danger' },
+      { action: 'show-users', title: 'Show Users', icon: 'fas fa-user', variant: 'info' }
+    ];
+  }
 	
 	getFormElements() {
 		return {

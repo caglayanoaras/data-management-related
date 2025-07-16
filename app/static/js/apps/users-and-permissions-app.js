@@ -12,18 +12,17 @@ class UsersPermissionsApp {
 
     initializeManagers() {
         // Initialize managers
-        this.sidebarManager = new UsersAndPermissionsSidebarManager();
         this.userRoleManager = new UserRoleManager();
         this.userSkillManager = new UserSkillManager();
         this.userModuleManager = new UserModuleManager();
         this.userManager = new UserManager();
 
-        // Make managers globally accessible if needed
-        window.userRoleManager = this.userRoleManager;
-        window.userSkillManager = this.userSkillManager;
-        window.sidebarManager = this.sidebarManager;
-        window.userModuleManager = this.userModuleManager;
-        window.userManager = this.userManager;
+        this.sidebarManager = new UsersAndPermissionsSidebarManager({
+            userRoleManager: this.userRoleManager,
+            userSkillManager: this.userSkillManager,
+            userModuleManager: this.userModuleManager,
+            userManager: this.userManager
+        });
     }
 }
 

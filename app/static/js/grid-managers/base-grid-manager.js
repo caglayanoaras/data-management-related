@@ -1,5 +1,3 @@
-console.log("base-grid-manager.js loaded");
-
 // Base class for all grid managers
 export class BaseGridManager {
   constructor(gridSelector, preferredColumnOrder = []) {
@@ -19,10 +17,10 @@ export class BaseGridManager {
   getFormData() { throw new Error("Must implement getFormData()"); }
 
   // Override in subclasses for custom column definitions
-  getCustomColumnDef(key) { return null; }
-  getActionButtons() { return null } // Override in subclasses to define action buttons
-  getCustomActionHandler(action) { return null; }
-  validateFormData(formData, isEdit = false) { return null; } // Validation is not needed because backend will handle it.
+  getCustomColumnDef(key) { }
+  getActionButtons() { } // Override in subclasses to define action buttons
+  getCustomActionHandler(action) { }
+  validateFormData(formData, isEdit = false) { } // Validation is not needed because backend will handle it.
   clearForm() { }
   populateForm(data) { }
 
@@ -146,6 +144,17 @@ export class BaseGridManager {
       };
     }
 
+    if (key === "id") {
+      return {
+        field: "id",
+        headerName: "ID",
+        resizable: true,
+        sortable: true,
+        filter: false,
+        maxWidth: 75,
+      };
+    }
+
     // Allow subclasses to override column definitions
     const customColumnDef = this.getCustomColumnDef(key);
     if (customColumnDef) {
@@ -220,7 +229,7 @@ export class BaseGridManager {
     }
 
     const modal = bootstrap.Modal.getOrCreateInstance(
-      document.getElementById("showUsersModal")
+      document.getElementById("showLinksModal")
     );
     modal.show();
   }

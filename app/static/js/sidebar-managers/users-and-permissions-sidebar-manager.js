@@ -1,54 +1,57 @@
 export class UsersAndPermissionsSidebarManager {
-    constructor() {
-        this.sidebarButtons = document.querySelectorAll('.sidebar-btn');
-        this.contentSections = document.querySelectorAll('.content-section');
-        this.welcomeContent = document.getElementById('welcome-content');
-        this.initializeEventListeners();
-    }
+  constructor({ userRoleManager, userManager, userSkillManager, userModuleManager }) {
+    this.userRoleManager = userRoleManager;
+    this.userManager = userManager;
+    this.userSkillManager = userSkillManager;
+    this.userModuleManager = userModuleManager;
 
-    initializeEventListeners() {
-        this.sidebarButtons.forEach(button => {
-            button.addEventListener('click', (e) => {
-                this.handleSidebarClick(e.currentTarget);
-            });
-        });
-    }
+    this.sidebarButtons = document.querySelectorAll('.sidebar-btn');
+    this.contentSections = document.querySelectorAll('.content-section');
+    this.welcomeContent = document.getElementById('welcome-content');
+    this.initializeEventListeners();
+  }
 
-    handleSidebarClick(button) {
-        const contentType = button.dataset.content;
-        
-        // Update active states
-        this.sidebarButtons.forEach(btn => btn.classList.remove('active'));
-        button.classList.add('active');
-        
-        // Hide all content
-        this.welcomeContent.style.display = 'none';
-        this.contentSections.forEach(section => section.style.display = 'none');
-        
-        // Show selected content
-        const targetContent = document.getElementById(contentType + '-content');
-        if (targetContent) {
-            targetContent.style.display = 'block';
-            this.handleContentTypeSpecificActions(contentType);
-        }
-    }
+  initializeEventListeners() {
+    this.sidebarButtons.forEach(button => {
+      button.addEventListener('click', (e) => {
+        this.handleSidebarClick(e.currentTarget);
+      });
+    });
+  }
 
-    handleContentTypeSpecificActions(contentType) {
-        switch (contentType) {
-            case 'user-roles':
-                if (window.userRoleManager) {
-                    window.userRoleManager.loadRoles();
-                }
-                break;
-            case 'users':
-                window.userManager.loadUsers();
-                break;
-            case 'user-skills':
-                window.userSkillManager.loadSkills();
-                break;
-            case 'modules':
-                window.userModuleManager.loadModules();
-                break;
-        }
+  handleSidebarClick(button) {
+    const contentType = button.dataset.content;
+    
+    // Update active states
+    this.sidebarButtons.forEach(btn => btn.classList.remove('active'));
+    button.classList.add('active');
+    
+    // Hide all content
+    this.welcomeContent.style.display = 'none';
+    this.contentSections.forEach(section => section.style.display = 'none');
+    
+    // Show selected content
+    const targetContent = document.getElementById(contentType + '-content');
+    if (targetContent) {
+      targetContent.style.display = 'block';
+      this.handleContentTypeSpecificActions(contentType);
     }
+  }
+
+  handleContentTypeSpecificActions(contentType) {
+    switch (contentType) {
+      case 'user-roles':
+        this.userRoleManager?.loadRoles?.();
+        break;
+      case 'users':
+        this.userManager?.loadUsers?.();
+        break;
+      case 'user-skills':
+        this.userSkillManager?.loadSkills?.();
+        break;
+      case 'modules':
+        this.userModuleManager?.loadModules?.();
+        break;
+    }
+  }
 }

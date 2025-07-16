@@ -1,5 +1,7 @@
 import { BaseGridManager } from './base-grid-manager.js';
 
+const grid = document.querySelector("#users-url");
+
 export class UserManager extends BaseGridManager {
   constructor() {
     super("#users-grid", ["id", "is_active", "username", "name", "surname", "email", "usertype", "title", "roles", "skills", "modules"]);
@@ -12,14 +14,14 @@ export class UserManager extends BaseGridManager {
 
   getEntityName() { return "User"; }
 
-  getApiUrls() {
-    return {
-      getAll: "{{ url_for('get_all_users') }}",
-      create: "{{ url_for('create_new_user') }}",
-      update: "{{ url_for('update_existing_user', username='PLACEHOLDER') }}",
-      delete: "{{ url_for('delete_user_by_username', username='PLACEHOLDER') }}"
-    };
-  }
+	getApiUrls() {
+		return {
+			getAll: grid.dataset.urlGetAll,
+			create: grid.dataset.urlCreate,
+			update: grid.dataset.urlUpdate,
+			delete: grid.dataset.urlDelete
+		};
+	}
   
   getFormElements() {
     return {
@@ -118,6 +120,71 @@ export class UserManager extends BaseGridManager {
     };
     return handlers[action];
   } 
+
+  showUserRoles(roles) {
+    this.showItemsInModal(roles, "Roles", "role");
+}
+
+showUserSkills(skills) {
+    this.showItemsInModal(skills, "Skills", "skill");
+}
+
+showUserModules(modules) {
+    this.showItemsInModal(modules, "Modules", "module");
+}
+
+showItemsInModal(items, title, type) {
+    const linksList = document.getElementById("linksList");
+    const modalTitle = document.querySelector("#showLinksModal .modal-title");
+    
+    modalTitle.textContent = `User ${title} (${items.length})`;
+    linksList.innerHTML = "";
+
+    if (items.length === 0) {
+      linksList.innerHTML = `<li class='list-group-item text-muted'>No ${type}s assigned</li>`;
+    } else {
+        items.forEach(item => {
+            const listItem = this.createItemListItem(item, type);
+            linksList.appendChild(listItem);
+        });
+    }
+
+    const modal = bootstrap.Modal.getOrCreateInstance(
+        document.getElementById("showLinksModal")
+    );
+    modal.show();
+}
+
+createItemListItem(item, type) {
+    const li = document.createElement("li");
+    li.className = "list-group-item";
+    
+    let content = '';
+    if (type === 'role') {
+        content = `
+            <strong>${item.rolename}</strong>
+            <div><small>${item.notes || 'No notes'}</small></div>
+        `;
+    } else if (type === 'skill') {
+        content = `
+            <strong>${item.skillname}</strong>
+            <div><small>Level: ${item.skill_level || 'N/A'} | ${item.notes || 'No notes'}</small></div>
+        `;
+    } else if (type === 'module') {
+        content = `
+            <strong>${item.title}</strong>
+            <div><small>${item.description || 'No description'}</small></div>
+        `;
+    }
+    
+    li.innerHTML = content;
+    return li;
+}
+
+
+
+
+
 
   async showModal(mode, params = null) {
     this.currentMode = mode;
