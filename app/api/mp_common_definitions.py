@@ -57,18 +57,18 @@ def get_location_by_id(current_user: UserDep, location_id: int, db: SessionDep):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Location not found")
     return location
 
-@mp_common_definitions_router.post("/locations/", response_model=Location, status_code=status.HTTP_201_CREATED)
+@mp_common_definitions_router.post("/locations/", name='create_new_location', response_model=Location, status_code=status.HTTP_201_CREATED)
 def create_new_location(current_user: UserDep, location_create: LocationCreate, db: SessionDep):
     return create_location(db=db, location_create=location_create)
 
-@mp_common_definitions_router.put("/locations/{location_id}", response_model=Location)
+@mp_common_definitions_router.put("/locations/{location_id}",name='update_existing_location', response_model=Location)
 def update_existing_location(current_user: UserDep, location_id: int, location_update: LocationUpdate, db: SessionDep):
     db_location = read_location(db, location_id)
     if not db_location:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Location not found")
     return update_location(db=db, db_location=db_location, input_location=location_update)
 
-@mp_common_definitions_router.delete("/locations/{location_id}", status_code=status.HTTP_204_NO_CONTENT)
+@mp_common_definitions_router.delete("/locations/{location_id}",name='delete_location_by_id', status_code=status.HTTP_204_NO_CONTENT)
 def delete_location_by_id(current_user: UserDep, location_id: int, db: SessionDep):
     if not delete_location(db, location_id):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Location not found")

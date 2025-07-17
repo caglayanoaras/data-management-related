@@ -19,21 +19,20 @@ export class BaseGridManager {
   // Override in subclasses for custom column definitions
   getCustomColumnDef(key) { }
   getActionButtons() { } // Override in subclasses to define action buttons
-  getCustomActionHandler(action) { }
+  getCustomActionHandler(action) { } 
   validateFormData(formData, isEdit = false) { } // Validation is not needed because backend will handle it.
-  clearForm() { }
+  async initializeTomSelects() {}
   populateForm(data) { }
-
-  // Override in subclasses to preserve related data
-  preserveRelatedData(updatedData, originalData) {
-    // Default: preserve users array
-    updatedData.users = originalData.users || [];
-  }
 
   // Override in subclasses to initialize arrays for new items
   initializeNewItemArrays(newItem) {
     newItem.users = newItem.users || [];
   }
+  // Override in subclasses to define how to identify the item for updates
+  getUpdateIdentifier(data) { 
+    return data.id;
+  }
+
 
   // Common initialization
   initializeEventListeners() {
@@ -107,7 +106,7 @@ export class BaseGridManager {
       ...this.preferredColumnOrder,
       ...allKeys.filter(key => !this.preferredColumnOrder.includes(key))
     ];
-
+    console.log(orderedKeys)
     const columnDefs = orderedKeys.map(key => this.createColumnDef(key));
     columnDefs.push(this.createActionsColumn());
     
@@ -214,39 +213,66 @@ export class BaseGridManager {
     }
   }
 
-  // Common users display
   showUsers(users) {
-    const usersList = document.getElementById("linksList");
-    usersList.innerHTML = "";
+    this.showItemsInModal(users, 'Users');
+  }
 
-    if (users.length === 0) {
-      usersList.innerHTML = "<li class='list-group-item text-muted'>No users assigned</li>";
+  // Linked objects are shown as lists in a modal.
+  showItemsInModal(items, type) {
+    const linksList = document.getElementById("linksList");
+    const modalTitle = document.querySelector("#showLinksModal .modal-title");
+    
+    modalTitle.textContent = `${type} (${items.length})`;
+    linksList.innerHTML = "";
+
+    if (items.length === 0) {
+      linksList.innerHTML = `<li class='list-group-item text-muted'>No ${type} assigned</li>`;
     } else {
-      users.forEach(user => {
-        const listItem = this.createUserListItem(user);
-        usersList.appendChild(listItem);
-      });
+        items.forEach(item => {
+            const listItem = this.createItemListItem(item, type);
+            linksList.appendChild(listItem);
+        });
     }
 
     const modal = bootstrap.Modal.getOrCreateInstance(
-      document.getElementById("showLinksModal")
+        document.getElementById("showLinksModal")
     );
     modal.show();
   }
 
-  // Common user list item creation
-  createUserListItem(user) {
-      const li = document.createElement("li");
-      li.className = "list-group-item";
-      li.innerHTML = `
-          <strong>${user.name} ${user.surname}</strong>
-          <div><small>${user.email} – ${user.usertype}</small></div>
+  createItemListItem(item, type) {
+    const li = document.createElement("li");
+    li.className = "list-group-item";
+    
+    let content = '';
+    if (type === 'Roles') {
+      content = `
+        <strong>${item.rolename}</strong>
+        <div><small>${item.notes || 'No notes'}</small></div>
       `;
-      return li;
+    } else if (type === 'Skills') {
+      content = `
+        <strong>${item.skillname}</strong>
+        <div><small>Level: ${item.skill_level || 'N/A'} | ${item.notes || 'No notes'}</small></div>
+      `;
+    } else if (type === 'Modules') {
+      content = `
+        <strong>${item.title}</strong>
+        <div><small>${item.description || 'No description'}</small></div>
+      `;
+    } else if (type === 'Users') {
+      content = `
+        <strong>${item.name} ${item.surname}</strong>
+        <div><small>${item.email} – ${item.usertype}</small></div>
+      `;
+    }
+    
+    li.innerHTML = content;
+    return li;
   }
 
   // Common modal display
-  showModal(mode, params = null) {
+  async showModal(mode, params = null) {
     this.currentMode = mode;
     const elements = this.getFormElements();
 
@@ -255,6 +281,9 @@ export class BaseGridManager {
         document.getElementById(elements.modal)
       );
     }
+
+    // Initialize Tom Select instances
+    await this.initializeTomSelects();
 
     const form = document.getElementById(elements.form);
     const titleEl = document.getElementById(elements.modalTitle);
@@ -267,7 +296,7 @@ export class BaseGridManager {
       this.clearForm();
     } else {
       this.gridDiv.__pendingEdit = {
-        id: params.data.id,
+        id: this.getUpdateIdentifier(params.data),
         rowData: params.data,
         rowNode: params.node
       };
@@ -282,7 +311,7 @@ export class BaseGridManager {
   // Common delete confirmation
   showDeleteConfirmation(params) {
     this.gridDiv.__pendingDelete = {
-      id: params.data.id,
+      id: this.getUpdateIdentifier(params.data),
       rowNode: params.node
     };
 
@@ -351,9 +380,6 @@ export class BaseGridManager {
         const updatedItem = await response.json();
         const updatedData = { ...pending.rowData, ...updatedItem };
         
-        // Preserve related data
-        this.preserveRelatedData(updatedData, pending.rowData);
-        
         this.gridDiv.__agGridInstance.applyTransaction({ update: [updatedData] });
       } else {
         const errorText = await response.text();
@@ -400,6 +426,7 @@ export class BaseGridManager {
     if (modal) {
       modal.hide();
     }
+    this.destroyTomSelects();
   }
 
   // Common form reset
@@ -452,5 +479,25 @@ export class BaseGridManager {
     console.error(message, error);
     alert("Network error - please try again.");
   }  
-  
+
+  destroyTomSelects() {
+    Object.entries(this.tomSelectInstances).forEach(([key, instance]) => {
+      if (instance) {
+        instance.destroy();
+      }
+      this.tomSelectInstances[key] = null;
+    });
+  }
+
+  clearTomSelects() {
+    Object.values(this.tomSelectInstances).forEach(instance => {
+      if (instance) {
+        instance.clear();
+      }
+    });
+  }
+
+  clearForm() { 
+    this.clearTomSelects(); 
+  }
 }

@@ -209,7 +209,7 @@ class UserRoleCreate(UserRoleBase):
 
 class UserRoleRead(UserRoleBase):
     id: int
-    users: list["UserShortBase"] | None = None
+    users: list["UserShortRead"] | None = None
 
 class UserRoleShortRead(UserRoleBase):
     id: int
@@ -244,7 +244,7 @@ class UserSkillCreate(UserSkillBase):
 
 class UserSkillRead(UserSkillBase):
     id: int
-    users: list["UserShortBase"] | None = None
+    users: list["UserShortRead"] | None = None
 
 class UserSkillShortRead(UserSkillBase):
     id: int
@@ -277,7 +277,7 @@ class ModuleShortRead(ModuleBase):
 
 class ModuleRead(ModuleBase):
     id: int
-    users: list["UserShortBase"] | None = None
+    users: list["UserShortRead"] | None = None
 # endregion
 
 # region Division models
@@ -333,7 +333,7 @@ class DivisionUpdate(DivisionBase):
 class LocationBase(SQLModel):
     code: str = Field(index=True, unique=True, nullable=False)
     name: str = Field(index=True, nullable=False)
-    adress: str | None = Field(default=None, max_length=255)
+    address: str | None = Field(default=None, max_length=255)
     description: str | None = Field(default=None, max_length=255)
 
 class Location(LocationBase, table=True):
@@ -350,7 +350,7 @@ class LocationCreate(LocationBase):
 
 class LocationRead(LocationBase):
     id: int
-    warehouses: list["WarehouseBase"] | None = None
+    warehouses: list["WarehouseShortRead"] | None = None
 
 class LocationShortRead(LocationBase):
     id: int

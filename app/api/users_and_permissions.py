@@ -245,7 +245,7 @@ def delete_user_by_username(current_user: UserDep, username: str, db: Session = 
 
 # region module operations
 @users_and_permissions_router.get("/modules/", name='get_all_modules', response_model=list[ModuleRead])
-def get_all_user_roles(current_user: UserDep, db: Session = Depends(get_session)):
+def get_all_modules(current_user: UserDep, db: Session = Depends(get_session)):
     return read_all_modules(db)
 # endregion
 
