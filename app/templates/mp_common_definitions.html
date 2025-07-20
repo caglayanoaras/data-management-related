@@ -55,6 +55,187 @@
   </div>
 </div>
 
+<!-- Add/Edit Warehouse Modal -->
+<div class="modal fade" id="warehouses-Modal" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 id="warehouses-ModalTitle" class="modal-title"></h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+
+      <div class="modal-body">
+        <form id="warehouses-Form" autocomplete="off">
+          <div class="mb-3">
+            <label for="warehouses-code" class="form-label">Code</label>
+            <input id="warehouses-code" class="form-control" required>
+          </div>
+          <div class="mb-3">
+            <label for="warehouses-name" class="form-label">Name</label>
+            <input id="warehouses-name" class="form-control" required>
+          </div>
+
+          <div class="mb-3">
+            <label for="warehouses-description" class="form-label">Description</label>
+            <textarea class="form-control" id="warehouses-description" rows="2"></textarea>
+          </div>
+          <!-- Tom Select Sections -->
+          <div class="row">
+            <div class="col-md-6">
+              <div class="mb-3">
+                <label for="warehouses-locations" class="form-label">
+                  <i class="fas fa-location-dot text-warning me-1"></i>
+                  Locations
+                </label>
+                <select id="warehouses-locations" multiple placeholder="Select locations...">
+                </select>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="mb-3">
+                <label for="warehouses-divisions" class="form-label">
+                  <i class="fas fa-building text-danger me-1"></i>
+                  Divisions
+                </label>
+                <select id="warehouses-divisions" multiple placeholder="Select divisions...">
+                </select>
+              </div>
+            </div>
+          </div>
+
+        </form>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button id="warehouses-saveWarehouseBtn" class="btn btn-warning">
+          <i class="fas fa-save me-1"></i>Save Changes
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Add/Edit Division Modal -->
+<div class="modal fade" id="divisions-Modal" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 id="divisions-ModalTitle" class="modal-title"></h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+
+      <div class="modal-body">
+        <form id="divisions-Form" autocomplete="off">
+          <div class="mb-3">
+            <label for="divisions-code" class="form-label">Code</label>
+            <input id="divisions-code" class="form-control" required>
+          </div>
+          <div class="mb-3">
+            <label for="divisions-name" class="form-label">Name</label>
+            <input id="divisions-name" class="form-control" required>
+          </div>
+
+          <div class="mb-3">
+            <label for="divisions-description" class="form-label">Description</label>
+            <textarea class="form-control" id="divisions-description" rows="2"></textarea>
+          </div>
+          <!-- Tom Select Sections -->
+          <div class="row">
+            <div class="col-md-4">
+              <div class="mb-3">
+                <label for="divisions-laboratories" class="form-label">
+                  <i class="fas fa-flask-vial text-success me-1"></i>
+                  Laboratories
+                </label>
+                <select id="divisions-laboratories" multiple placeholder="Select laboratories...">
+                </select>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="mb-3">
+                <label for="divisions-warehouses" class="form-label">
+                  <i class="fas fa-warehouse text-warning me-1"></i>
+                  Warehouses
+                </label>
+                <select id="divisions-warehouses" multiple placeholder="Select warehouses...">
+                </select>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="mb-3">
+                <label for="divisions-users" class="form-label">
+                  <i class="fas fa-users text-primary me-1"></i>
+                  Users
+                </label>
+                <select id="divisions-users" multiple placeholder="Select users...">
+                </select>
+              </div>
+            </div>
+          </div>
+
+        </form>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button id="divisions-saveDivisionBtn" class="btn btn-warning">
+          <i class="fas fa-save me-1"></i>Save Changes
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Add/Edit Laboratory Modal -->
+<div class="modal fade" id="laboratories-Modal" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 id="laboratories-ModalTitle" class="modal-title"></h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+
+      <div class="modal-body">
+        <form id="laboratories-Form" autocomplete="off">
+          <div class="mb-3">
+            <label for="laboratories-code" class="form-label">Code</label>
+            <input id="laboratories-code" class="form-control" required>
+          </div>
+          <div class="mb-3">
+            <label for="laboratories-name" class="form-label">Name</label>
+            <input id="laboratories-name" class="form-control" required>
+          </div>
+
+          <div class="mb-3">
+            <label for="laboratories-description" class="form-label">Description</label>
+            <textarea class="form-control" id="laboratories-description" rows="2"></textarea>
+          </div>
+          <!-- Tom Select Sections -->
+          <div class="row">
+            <div class="col-md-12">
+              <div class="mb-3">
+                <label for="laboratories-divisions" class="form-label">
+                  <i class="fas fa-building text-danger me-1"></i>
+                  Divisions
+                </label>
+                <select id="laboratories-divisions" multiple placeholder="Select divisions...">
+                </select>
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button id="laboratories-saveLaboratoryBtn" class="btn btn-warning">
+          <i class="fas fa-save me-1"></i>Save Changes
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div class="row g-0">
   <!-- Sidebar -->
   <div class="col-lg-2 col-md-3">
@@ -216,10 +397,10 @@
       <div id="warehouses-content" class="content-section fade-in" style="display: none;">
         <div class="d-flex justify-content-between align-items-center mb-4">
           <h3 class="mb-0">
-            <i class="fas fa-warehouse text-primary me-2"></i>
+            <i class="fas fa-warehouse text-warning me-2"></i>
             Warehouses Management
           </h3>
-          <button class="btn btn-primary" id="warehouses-addBtn">
+          <button class="btn btn-warning" id="warehouses-addBtn">
             <i class="fas fa-plus me-2"></i>
             Add Warehouse
           </button>

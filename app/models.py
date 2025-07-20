@@ -160,6 +160,7 @@ class UserCreate(UserImagelessBase):
     roles: list[int] = Field(default_factory=list, description="List of role IDs to assign to the user")
     modules: list[int] = Field(default_factory=list, description="List of module IDs to assign to the user")
     skills: list[int] = Field(default_factory=list, description="List of skill IDs to assign to the user")
+    divisions: list[str] = Field(default_factory=list, description="List of division codes to assign to the user")
 
 class UserRead(UserImagelessBase):
     id: int
@@ -183,7 +184,7 @@ class UserUpdate(SQLModel):
     roles: list[int] | None = Field(default=None, description="List of role IDs to assign to the user")
     modules: list[int] | None = Field(default=None, description="List of module IDs to assign to the user")
     skills: list[int] | None = Field(default=None, description="List of skill IDs to assign to the user")
-    
+    divisions: list[str] | None = Field(default=None, description="List of division codes to assign to the user")
 #endregion
 
 # region UserRole models

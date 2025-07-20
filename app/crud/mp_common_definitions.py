@@ -231,7 +231,7 @@ def read_division(db: Session, division_id: int) -> DivisionRead | None:
         .options(
             selectinload(Division.laboratories),
             selectinload(Division.warehouses),
-            selectinload(Division.employees)
+            selectinload(Division.users)
         )
         .where(Division.id == division_id)
     )
@@ -242,12 +242,12 @@ def read_all_divisions(db: Session) -> list[DivisionRead]:
     statement = select(Division).options(
         selectinload(Division.laboratories),
         selectinload(Division.warehouses),
-        selectinload(Division.employees)
+        selectinload(Division.users)
     )
     return db.exec(statement).all()
 
 def create_division(*, db: Session, division_create: DivisionCreate) -> Division:
-    """Creates a division, linking it to laboratories, warehouses, and employees."""
+    """Creates a division, linking it to laboratories, warehouses, and users."""
     if db.exec(select(Division).where(Division.code == division_create.code)).first():
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -271,10 +271,10 @@ def create_division(*, db: Session, division_create: DivisionCreate) -> Division
         db_division.warehouses = warehouses
 
     if division_create.users:
-        employees = db.exec(select(User).where(User.username.in_(division_create.users))).all()
-        if len(employees) != len(set(division_create.users)):
-            raise HTTPException(status_code=404, detail="One or more employees not found")
-        db_division.employees = employees
+        users = db.exec(select(User).where(User.username.in_(division_create.users))).all()
+        if len(users) != len(set(division_create.users)):
+            raise HTTPException(status_code=404, detail="One or more users not found")
+        db_division.users = users
     
     db.add(db_division)
     db.commit()
@@ -304,10 +304,10 @@ def update_division(*, db: Session, db_division: Division, input_division: Divis
         db_division.warehouses = warehouses
 
     if input_division.users is not None:
-        employees = db.exec(select(User).where(User.username.in_(input_division.users))).all()
-        if len(employees) != len(set(input_division.users)):
-            raise HTTPException(status_code=404, detail="One or more employees not found")
-        db_division.employees = employees
+        users = db.exec(select(User).where(User.username.in_(input_division.users))).all()
+        if len(users) != len(set(input_division.users)):
+            raise HTTPException(status_code=404, detail="One or more users not found")
+        db_division.users = users
 
     db.add(db_division)
     db.commit()

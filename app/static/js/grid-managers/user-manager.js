@@ -4,10 +4,11 @@ const grid = document.querySelector("#users-url");
 
 export class UserManager extends BaseGridManager {
   constructor() {
-    super("#users-grid", ["id", "is_active", "username", "name", "surname", "email", "usertype", "title", "roles", "skills", "modules"]);
+    super("#users-grid", ["id", "is_active", "username", "name", "surname", "email", "usertype", "title", "roles", "skills", "divisions", "modules"]);
     this.tomSelectInstances = {
       roles: null,
       skills: null,
+      divisions: null,
       modules: null
     };
   }
@@ -16,9 +17,10 @@ export class UserManager extends BaseGridManager {
     try {
       this.destroyTomSelects();
 
-      const [rolesData, skillsData, modulesData] = await Promise.all([
+      const [rolesData, skillsData, divisionsData, modulesData] = await Promise.all([
           this.fetchRoles(),
           this.fetchSkills(),
+          this.fetchDivisions(),
           this.fetchModules()
       ]);
 
@@ -41,7 +43,15 @@ export class UserManager extends BaseGridManager {
           create: false,
           placeholder: 'Select skills...'
       });
-
+      this.tomSelectInstances.divisions = new TomSelect('#users-divisions', {
+        plugins: ['remove_button'],
+        valueField: 'code',
+        labelField: 'code',
+        searchField: 'code',
+        options: divisionsData,
+        create: false,
+        placeholder: 'Select divisions...'
+    });
       this.tomSelectInstances.modules = new TomSelect('#users-modules', {
           plugins: ['remove_button'],
           valueField: 'id',
@@ -107,7 +117,9 @@ export class UserManager extends BaseGridManager {
     if (this.tomSelectInstances.modules) {
       formData.modules = this.tomSelectInstances.modules.getValue().map(id => parseInt(id));
     }
-
+    if (this.tomSelectInstances.divisions) {
+      formData.divisions = this.tomSelectInstances.divisions.getValue();
+    }
     return formData;
   }
 
@@ -151,12 +163,16 @@ export class UserManager extends BaseGridManager {
     if (key === "divisions") {
       return {
         field: "divisions",
-        headerName: "DIVISIONS",
-        valueGetter: (params) => `${params.data.modules?.length || 0} module(s)`,
+        headerName: "DIVISION(S)",
+        valueGetter: (params) => {
+          const divisions = params.data.divisions;
+          if (!divisions || !Array.isArray(divisions) || divisions.length === 0) {
+            return 'No divisions';
+          }
+          return divisions.map(division => division.code).join(', ');
+        },
         sortable: true,
         filter: false,
-        minWidth: 120,
-        hide: true
       };
     }
     return null;
@@ -217,13 +233,6 @@ export class UserManager extends BaseGridManager {
     return true;
   }
 
-  // Override to initialize user-specific arrays
-  initializeNewItemArrays(newItem) {
-    newItem.roles = newItem.roles || [];
-    newItem.skills = newItem.skills || [];
-    newItem.modules = newItem.modules || [];
-  }
-
   async fetchRoles() {
     const roleGrid = document.querySelector("#user-roles-url");
     const response = await fetch(roleGrid.dataset.urlGetAll, {
@@ -253,7 +262,15 @@ export class UserManager extends BaseGridManager {
     if (!response.ok) throw new Error('Failed to fetch modules');
     return await response.json();
   }
-
+  async fetchDivisions() {
+    const moduleGrid = document.querySelector("#divisions-url");
+    const response = await fetch(moduleGrid.dataset.urlGetAll, {
+      method: 'GET',
+      headers: { 'Accept': 'application/json' }
+    });
+    if (!response.ok) throw new Error('Failed to fetch divisions');
+    return await response.json();
+  }
   populateForm(data) {
     document.getElementById("users-username").value = data.username || "";
     document.getElementById("users-email").value = data.email || "";
@@ -281,6 +298,10 @@ export class UserManager extends BaseGridManager {
     if (userData.modules && this.tomSelectInstances.modules) {
       const moduleIds = userData.modules.map(module => module.id.toString());
       this.tomSelectInstances.modules.setValue(moduleIds);
+    }
+    if (userData.divisions && this.tomSelectInstances.divisions) {
+      const divisionCodes = userData.divisions.map(division => division.code);
+      this.tomSelectInstances.divisions.setValue(divisionCodes);
     }
   }
 

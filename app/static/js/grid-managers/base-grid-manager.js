@@ -24,10 +24,6 @@ export class BaseGridManager {
   async initializeTomSelects() {}
   populateForm(data) { }
 
-  // Override in subclasses to initialize arrays for new items
-  initializeNewItemArrays(newItem) {
-    newItem.users = newItem.users || [];
-  }
   // Override in subclasses to define how to identify the item for updates
   getUpdateIdentifier(data) { 
     return data.id;
@@ -106,7 +102,6 @@ export class BaseGridManager {
       ...this.preferredColumnOrder,
       ...allKeys.filter(key => !this.preferredColumnOrder.includes(key))
     ];
-    console.log(orderedKeys)
     const columnDefs = orderedKeys.map(key => this.createColumnDef(key));
     columnDefs.push(this.createActionsColumn());
     
@@ -265,6 +260,26 @@ export class BaseGridManager {
         <strong>${item.name} ${item.surname}</strong>
         <div><small>${item.email} – ${item.usertype}</small></div>
       `;
+    } else if (type === 'Locations') {
+      content = `
+        <strong>${item.code} </strong>
+        <div><small>${item.name} </small></div>
+      `;
+    } else if (type === 'Divisions') {
+      content = `
+        <strong>${item.code} </strong>
+        <div><small>${item.name} </small></div>
+      `;
+    } else if (type === 'Warehouses') {
+      content = `
+        <strong>${item.code} </strong>
+        <div><small>${item.name} </small></div>
+      `;
+    } else if (type === 'Laboratories') {
+      content = `
+        <strong>${item.code} </strong>
+        <div><small>${item.name} </small></div>
+      `;
     }
     
     li.innerHTML = content;
@@ -328,7 +343,7 @@ export class BaseGridManager {
     if (!this.validateFormData(formData)) {
       return;
     }
-
+    console.log(formData)
     try {
       const response = await fetch(this.getApiUrls().create, {
         method: "POST",
@@ -444,9 +459,6 @@ export class BaseGridManager {
       console.error("Grid instance not found");
       return false;
     }
-
-    // Initialize arrays that might be needed
-    this.initializeNewItemArrays(newItem);
 
     const currentColumnDefs = this.gridDiv.__agGridInstance.getColumnDefs();
     const isEmptyGrid = !currentColumnDefs || currentColumnDefs.length === 0;

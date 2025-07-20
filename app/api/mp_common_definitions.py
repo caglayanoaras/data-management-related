@@ -87,7 +87,7 @@ def get_warehouse_by_id(current_user: UserDep, warehouse_id: int, db: SessionDep
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Warehouse not found")
     return warehouse
 
-@mp_common_definitions_router.post("/warehouses/", response_model=WarehouseRead, status_code=status.HTTP_201_CREATED)
+@mp_common_definitions_router.post("/warehouses/", name='create_new_warehouse', response_model=WarehouseRead, status_code=status.HTTP_201_CREATED)
 def create_new_warehouse(current_user: UserDep, warehouse_create: WarehouseCreate, db: SessionDep):
     return create_warehouse(db=db, warehouse_create=warehouse_create)
 

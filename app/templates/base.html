@@ -51,6 +51,27 @@
       data-url-delete="{{ url_for('delete_location_by_id', location_id='PLACEHOLDER') }}">
   </div>
 
+  <div id="warehouses-url"
+      data-url-get-all="{{ url_for('get_all_warehouses') }}"
+      data-url-create="{{ url_for('create_new_warehouse') }}"
+      data-url-update="{{ url_for('update_existing_warehouse', warehouse_id='PLACEHOLDER') }}"
+      data-url-delete="{{ url_for('delete_warehouse_by_id', warehouse_id='PLACEHOLDER') }}">
+  </div>
+
+  <div id="divisions-url"
+      data-url-get-all="{{ url_for('get_all_divisions') }}"
+      data-url-create="{{ url_for('create_new_division') }}"
+      data-url-update="{{ url_for('update_existing_division', division_id='PLACEHOLDER') }}"
+      data-url-delete="{{ url_for('delete_division_by_id', division_id='PLACEHOLDER') }}">
+  </div>
+
+  <div id="laboratories-url"
+      data-url-get-all="{{ url_for('get_all_laboratories') }}"
+      data-url-create="{{ url_for('create_new_laboratory') }}"
+      data-url-update="{{ url_for('update_existing_laboratory', laboratory_id='PLACEHOLDER') }}"
+      data-url-delete="{{ url_for('delete_laboratory_by_id', laboratory_id='PLACEHOLDER') }}">
+  </div>
+  
   <!-- Show Links Modal. This is actually a general modal for showing linked objects -->
   <div class="modal fade" id="showLinksModal" tabindex="-1">
     <div class="modal-dialog modal-dialog-scrollable modal-lg">

@@ -6,7 +6,7 @@ from app.models import (
     UserRole, UserRoleCreate, UserRoleUpdate, UserRoleRead,
     UserSkill, UserSkillCreate, UserSkillUpdate, UserSkillRead,
     User, UserCreate, UserType, UserUpdate, UserRead,
-    Module, ModuleRead)
+    Module, ModuleRead, Division, DivisionRead)
 
 from app.dependencies.auth import get_password_hash
 
@@ -129,14 +129,16 @@ def read_user(db: Session, username: str) -> UserRead | None:
     statement = select(User).options(
         selectinload(User.roles), 
         selectinload(User.modules),
-        selectinload(User.skills)).where(User.username == username)
+        selectinload(User.skills),
+        selectinload(User.divisions)).where(User.username == username)
     return db.exec(statement).first()
 
 def read_all_users(db: Session) -> list[UserRead]:
     statement = select(User).options(
         selectinload(User.roles), 
         selectinload(User.modules),
-        selectinload(User.skills))
+        selectinload(User.skills),
+        selectinload(User.divisions))
     return db.exec(statement).all()
 
 def create_user(*, db: Session, user_create: UserCreate, created_by:str) -> User:
@@ -148,7 +150,7 @@ def create_user(*, db: Session, user_create: UserCreate, created_by:str) -> User
         raise HTTPException(status_code=400, detail="Username or email already exists")
 
     # Create user object
-    user_data = user_create.model_dump(exclude={"pw", "roles", "modules", "skills"})
+    user_data = user_create.model_dump(exclude={"pw", "roles", "modules", "skills", 'divisions'})
     hashed_pw = get_password_hash(user_create.pw)
     db_user = User(**user_data, hashed_pw=hashed_pw, created_by=created_by, last_modified_by=created_by)
     db.add(db_user)
@@ -187,6 +189,13 @@ def create_user(*, db: Session, user_create: UserCreate, created_by:str) -> User
             raise HTTPException(status_code=404, detail=f"Skills not found: {missing}")
         db_user.skills = skills
 
+    if user_create.divisions:
+        divisions = db.exec(select(Division).where(Division.code.in_(user_create.divisions))).all()
+        if len(divisions) != len(set(user_create.divisions)):
+            missing = set(user_create.divisions) - {div.code for div in divisions}
+            raise HTTPException(status_code=404, detail=f"Divisions not found: {missing}")
+        db_user.divisions = divisions
+
     db.add(db_user)
     db.commit()
     db.refresh(db_user)
@@ -208,7 +217,7 @@ def update_user(*, db: Session, db_user: User, user_update: UserUpdate, updated_
         if db.exec(select(User).where(User.email == user_update.email)).first():
             raise HTTPException(status_code=400, detail="Email already exists")
 
-    data = user_update.model_dump(exclude_unset=True, exclude={"roles", "modules", "skills"})
+    data = user_update.model_dump(exclude_unset=True, exclude={"roles", "modules", "skills", 'divisions'})
     data["last_modified_at"] = datetime.now(timezone.utc)
     data["last_modified_by"] = updated_by
     db_user.sqlmodel_update(data)
@@ -231,6 +240,12 @@ def update_user(*, db: Session, db_user: User, user_update: UserUpdate, updated_
             missing = set(skill_ids) - {r.id for r in skills}
             raise HTTPException(status_code=404, detail=f"Skills not found: {missing}")
         db_user.skills = skills
+    if user_update.divisions is not None:   # None ➜ leave unchanged
+        divisions = db.exec(select(Division).where(Division.code.in_(user_update.divisions))).all()
+        if len(divisions) != len(set(user_update.divisions)):
+            missing = set(user_update.divisions) - {div.code for div in divisions}
+            raise HTTPException(status_code=404, detail=f"Divisions not found: {missing}")
+        db_user.divisions = divisions
 
     if new_usertype == UserType.superadmin:
         # Super‑admin always owns every module, ignoring payload
